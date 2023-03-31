@@ -3,6 +3,7 @@ library(shiny)
 ui <- navbarPage(
   title = "Heart Rate Variability", 
   
+  
   #prueba de codigo
   # Crea una opción de navegación para la ventana de inicio
   tabPanel("Home", 
