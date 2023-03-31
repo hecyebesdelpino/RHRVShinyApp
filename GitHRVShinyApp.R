@@ -1,7 +1,11 @@
+#Password token:
+ # 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
+
 library(shiny)
 
 ui <- navbarPage(
   title = "Heart Rate Variability", 
+  
   
   
   #prueba de codigo
@@ -12,6 +16,18 @@ ui <- navbarPage(
            actionButton(inputId = "botonTime", "Click for Time analysis"),
            actionButton(inputId = "botonFreq", "Click for Frequency analysis")
   ),
+  # Crea una opción de navegación para la ventana 2
+  tabPanel("Time analysis", 
+           h1("Do you want to perform a time analysis?"),
+           numericInput(inputId = "primer_numero", "Write the first number", value = 0),
+           numericInput(inputId = "segundo_numero", "Write the second number", value = 0),
+           actionButton(inputId = "Sumar",  "Sumar"),
+           textOutput("resultado")
+  ),
+  # Crea una opción de navegación para la ventana 3
+  tabPanel("Frequency analysis", 
+           h1("Do you want to perform a frequency analysis?")
+  ),
   
   # Crea una opción de navegación para la ventana 3
   tabPanel("Load Data", h1 = "Please load data",
@@ -21,21 +37,11 @@ ui <- navbarPage(
                      placeholder = "No file selected",
                      accept = ".txt",
                      width = "100%")
-  ),
-  
-  # Crea una opción de navegación para la ventana 2
-  tabPanel("Time analysis", 
-           h1("Do you want to perform a time analysis?"),
-           numericInput(inputId = "primer_numero", "Write the first number"),
-           numericInput(inputId = "segundo_numero", "Write the second number"),
-           actionButton(inputId = "Sumar",  "Sumar"),
-           textOutput("resultado")
-  ),
-  
-  # Crea una opción de navegación para la ventana 3
-  tabPanel("Frequency analysis", 
-           h1("Do you want to perform a frequency analysis?")
   )
+  
+  
+  
+
 )
 
 
@@ -55,5 +61,7 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui = ui, server = server)
+
+
 
 
