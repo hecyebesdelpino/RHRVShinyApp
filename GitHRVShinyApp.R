@@ -1,7 +1,9 @@
 #Password token:
 
- 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
- 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
+ #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
+ 
+ #Nuevo
+ #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
 
 file_validation<-function(path){
   # 1. Check if path really exists
@@ -134,8 +136,11 @@ server <- function(input, output, session) {
   })
     
   observeEvent(input$Analizar, {
-    output$cuadroAnalisis <- time_analysis(format = "rr", files = input$fileSelector, class = time_analysis())
-    
+    #output$cuadroAnalisis <- hrv.data = preparing_analysis( input$fileSelector$name, input$fileSelector$datapath, "RR")
+    output$cuadroAnalisis <-  renderPrint({
+      paste0("el archivo cargado es ",  input$fileSelector$name, " y su datapath es ",input$fileSelector$datapath)
+     })
+                                        
   })
  
 }
