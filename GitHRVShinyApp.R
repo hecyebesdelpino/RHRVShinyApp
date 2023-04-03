@@ -5,6 +5,9 @@
  #Nuevo
  #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
 
+#Nuevo 2
+ #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
+
 file_validation<-function(path){
   # 1. Check if path really exists
   if (dir.exists(path) != TRUE){
@@ -136,10 +139,15 @@ server <- function(input, output, session) {
   })
     
   observeEvent(input$Analizar, {
-    #output$cuadroAnalisis <- hrv.data = preparing_analysis( input$fileSelector$name, input$fileSelector$datapath, "RR")
+    hrv.data = preparing_analysis( input$fileSelector$name,"/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
+    #time_analysis(format = "RR", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
+    #hrv.data = preparing_analysis( "nsr001_rr_secs.txt","/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
+    #3time_analysis(format = "RR", file = "nsr001_rr_secs.txt", class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
     output$cuadroAnalisis <-  renderPrint({
       paste0("el archivo cargado es ",  input$fileSelector$name, " y su datapath es ",input$fileSelector$datapath)
-     })
+      #El collapse sirve para usar los saltos de linea de la consola
+      capture.output(time_analysis(format = "RR", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/'), collapse = "\n")
+      })
                                         
   })
  
@@ -147,11 +155,7 @@ server <- function(input, output, session) {
 
 shinyApp(ui = ui, server = server)
 
-rrs <- "/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/"
-
-time_analysis(format = "RR", files = "nsr001_rr_secs.txt", class = time_analysis(), rrs)
-
 
 hrv.data = preparing_analysis( "nsr001_rr_secs.txt","/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
-hrv.data = time_analysis(format = "RR", hrv.data, class = time_analysis())
-time_analysis<-function(format, files, class, rrs2, ...){
+time_analysis(format = "RR", file = "nsr001_rr_secs.txt", class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
+
