@@ -110,7 +110,9 @@ ui <- navbarPage(
                      accept = ".txt",
                      width = "100%"),
            actionButton("Analizar", "Mostrar analisis"),
-           textOutput("cuadroAnalisis")
+           textOutput("cuadroAnalisis"),
+           imageOutput("plotNIHR")
+           
   )
   
   
@@ -140,6 +142,14 @@ server <- function(input, output, session) {
     
   observeEvent(input$Analizar, {
     hrv.data = preparing_analysis( input$fileSelector$name,"/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
+   # output$plotNIHR = PlotNIHR(hrv.data)
+    
+    output$plotNIHR <- renderImage({
+      png <- png(width = 800, height = 400)
+      PlotNIHR(hrv.data)
+      dev.off()
+      png
+    }, deleteFile = FALSE)
     #time_analysis(format = "RR", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
     #hrv.data = preparing_analysis( "nsr001_rr_secs.txt","/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
     #3time_analysis(format = "RR", file = "nsr001_rr_secs.txt", class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
@@ -147,6 +157,7 @@ server <- function(input, output, session) {
       paste0("el archivo cargado es ",  input$fileSelector$name, " y su datapath es ",input$fileSelector$datapath)
       #El collapse sirve para usar los saltos de linea de la consola
       capture.output(time_analysis(format = "RR", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/'), collapse = "\n")
+      
       })
                                         
   })
