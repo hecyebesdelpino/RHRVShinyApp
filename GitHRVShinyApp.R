@@ -8,6 +8,9 @@
 #Nuevo 2
  #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
 
+#Nuevo 3
+#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
+
 file_validation<-function(path){
   # 1. Check if path really exists
   if (dir.exists(path) != TRUE){
@@ -75,6 +78,9 @@ time_analysis<-function(format, files, class, rrs2, ...){
 library(shiny)
 library(RHRV)
 
+#Library ShinyJS permits enable and disable botons
+library(shinyjs)
+
 ui <- navbarPage(
   title = "Heart Rate Variability", 
   
@@ -110,8 +116,9 @@ ui <- navbarPage(
                      accept = ".txt",
                      width = "100%"),
            actionButton("Analizar", "Mostrar analisis"),
+           shinyjs::disable("Analizar"), #Esto permite que no se pulse mientras no haya ningun archivo seleccionado
            textOutput("cuadroAnalisis"),
-           imageOutput("plotNIHR")
+           plotOutput("plotNIHR")
            
   )
   
@@ -140,25 +147,26 @@ server <- function(input, output, session) {
     output$archivosCargados <- renderText(name(archivoCargado))
   })
     
+ 
   observeEvent(input$Analizar, {
-    hrv.data = preparing_analysis( input$fileSelector$name,"/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
-   # output$plotNIHR = PlotNIHR(hrv.data)
+    if (!is.null(input$fileSelector)) {
+      shinyjs::enable("Analizar")
     
-    output$plotNIHR <- renderImage({
-      png <- png(width = 800, height = 400)
+    hrv.data = preparing_analysis( input$fileSelector$name,"/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
+    #Plot the file in the load data file
+    output$plotNIHR <- renderPlot({
       PlotNIHR(hrv.data)
-      dev.off()
-      png
-    }, deleteFile = FALSE)
+    })
     #time_analysis(format = "RR", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
     #hrv.data = preparing_analysis( "nsr001_rr_secs.txt","/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
     #3time_analysis(format = "RR", file = "nsr001_rr_secs.txt", class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
+    
     output$cuadroAnalisis <-  renderPrint({
       paste0("el archivo cargado es ",  input$fileSelector$name, " y su datapath es ",input$fileSelector$datapath)
       #El collapse sirve para usar los saltos de linea de la consola
       capture.output(time_analysis(format = "RR", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/'), collapse = "\n")
       
-      })
+      })}
                                         
   })
  
