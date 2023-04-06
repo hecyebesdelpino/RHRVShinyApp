@@ -77,14 +77,11 @@ time_analysis<-function(format, files, class, rrs2, ...){
 
 library(shiny)
 library(RHRV)
-
 #Library ShinyJS permits enable and disable botons
 library(shinyjs)
 
 ui <- navbarPage(
   title = "Heart Rate Variability", 
-  
-  
   
   #prueba de codigo
   # Crea una opción de navegación para la ventana de inicio
@@ -94,6 +91,7 @@ ui <- navbarPage(
            actionButton(inputId = "botonTime", "Click for Time analysis"),
            actionButton(inputId = "botonFreq", "Click for Frequency analysis")
   ),
+  
   # Crea una opción de navegación para la ventana 2
   tabPanel("Time analysis", 
            h1("Do you want to perform a time analysis?"),
@@ -102,6 +100,7 @@ ui <- navbarPage(
            actionButton(inputId = "Sumar",  "Sumar"),
            textOutput("resultado")
   ),
+  
   # Crea una opción de navegación para la ventana 3
   tabPanel("Frequency analysis", 
            h1("Do you want to perform a frequency analysis?")
@@ -116,15 +115,11 @@ ui <- navbarPage(
                      accept = ".txt",
                      width = "100%"),
            actionButton("Analizar", "Mostrar analisis"),
-           shinyjs::disable("Analizar"), #Esto permite que no se pulse mientras no haya ningun archivo seleccionado
+           #shinyjs::disable("Analizar"), #Esto permite que no se pulse mientras no haya ningun archivo seleccionado
            textOutput("cuadroAnalisis"),
-           plotOutput("plotNIHR")
-           
+           plotOutput("plotNIHR"),
+           tableOutput("tabla")
   )
-  
-  
-  
-
 )
 
 
@@ -164,9 +159,16 @@ server <- function(input, output, session) {
     output$cuadroAnalisis <-  renderPrint({
       paste0("el archivo cargado es ",  input$fileSelector$name, " y su datapath es ",input$fileSelector$datapath)
       #El collapse sirve para usar los saltos de linea de la consola
-      capture.output(time_analysis(format = "RR", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/'), collapse = "\n")
+      #capture.output(time_analysis(format = "RR", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/'), collapse = "\n")
+      capture.output(time_analysis(format = "RR", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/'))
       
-      })}
+    })
+    
+    output$tabla <-  renderTable({
+    capture.output(time_analysis(format = "RR", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/'), collapse = " ")
+    })
+    
+    }
                                         
   })
  
@@ -175,6 +177,6 @@ server <- function(input, output, session) {
 shinyApp(ui = ui, server = server)
 
 
-hrv.data = preparing_analysis( "nsr001_rr_secs.txt","/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
+#hrv.data = preparing_analysis( "nsr001_rr_secs.txt","/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
 time_analysis(format = "RR", file = "nsr001_rr_secs.txt", class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
 
