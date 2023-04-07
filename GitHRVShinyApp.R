@@ -71,7 +71,7 @@ time_analysis<-function(format, files, class, rrs2, ...){
     df=as.data.frame(row_list)
     dataFrame=rbind(dataFrame, df)
   }
-  dataFrame
+  return (dataFrame)
 }
 
 
@@ -118,7 +118,8 @@ ui <- navbarPage(
            #shinyjs::disable("Analizar"), #Esto permite que no se pulse mientras no haya ningun archivo seleccionado
            textOutput("cuadroAnalisis"),
            plotOutput("plotNIHR"),
-           tableOutput("tabla")
+           tableOutput("tabla"),
+           tableOutput("tablaHistorial")
   )
 )
 
@@ -144,10 +145,13 @@ server <- function(input, output, session) {
     
  
   observeEvent(input$Analizar, {
+    data3 = data.frame()
     if (!is.null(input$fileSelector)) {
       shinyjs::enable("Analizar")
     
     hrv.data = preparing_analysis( input$fileSelector$name,"/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
+    data2 = time_analysis(format = "RR", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
+    #data3 = data.frame()
     #Plot the file in the load data file
     output$plotNIHR <- renderPlot({
       PlotNIHR(hrv.data)
@@ -158,14 +162,15 @@ server <- function(input, output, session) {
     
     output$cuadroAnalisis <-  renderPrint({
       paste0("el archivo cargado es ",  input$fileSelector$name, " y su datapath es ",input$fileSelector$datapath)
-      #El collapse sirve para usar los saltos de linea de la consola
-      #capture.output(time_analysis(format = "RR", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/'), collapse = "\n")
-      capture.output(time_analysis(format = "RR", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/'))
-      
     })
     
     output$tabla <-  renderTable({
-    capture.output(time_analysis(format = "RR", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/'), collapse = " ")
+    data2
+    })
+    
+    output$tablaHistorial <-  renderTable({
+      data3 = rbind(data3, data2)
+      data3
     })
     
     }
@@ -177,6 +182,12 @@ server <- function(input, output, session) {
 shinyApp(ui = ui, server = server)
 
 
-#hrv.data = preparing_analysis( "nsr001_rr_secs.txt","/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
-time_analysis(format = "RR", file = "nsr001_rr_secs.txt", class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
+Ejemplo de rbind, este si me funciona, pero no en el server
+datas1 = data.frame()
+datas4 = time_analysis(format = "RR", file = "nsr001_rr_secs.txt", class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
+datas1 = rbind(datas1, datas4)
+
+
+hrv.data = preparing_analysis( "nsr001_rr_secs.txt","/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
+dataframe = time_analysis(format = "RR", file = "nsr001_rr_secs.txt", class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
 
