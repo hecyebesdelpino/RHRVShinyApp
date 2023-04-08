@@ -80,11 +80,15 @@ library(RHRV)
 #Library ShinyJS permits enable and disable botons
 library(shinyjs)
 
+#_______________________________________________________________________________
+################################################################################
+##USER##########################################################################
+################################################################################
+#_______________________________________________________________________________
+if(interactive()){
 ui <- navbarPage(
   title = "Heart Rate Variability", 
-  
-  #prueba de codigo
-  # Crea una opción de navegación para la ventana de inicio
+  #__HOME_______________________________________________________________________
   tabPanel("Home", 
            h1("Welcome to the HRV App"), 
            h2("Select what you want to do"),
@@ -92,7 +96,7 @@ ui <- navbarPage(
            actionButton(inputId = "botonFreq", "Click for Frequency analysis")
   ),
   
-  # Crea una opción de navegación para la ventana 2
+  #__TIME ANALYSIS______________________________________________________________
   tabPanel("Time analysis", 
            h1("Do you want to perform a time analysis?"),
            numericInput(inputId = "primer_numero", "Write the first number", value = 0),
@@ -101,92 +105,158 @@ ui <- navbarPage(
            textOutput("resultado")
   ),
   
-  # Crea una opción de navegación para la ventana 3
+  #__FREQUENCY ANALYSIS_________________________________________________________
   tabPanel("Frequency analysis", 
            h1("Do you want to perform a frequency analysis?")
   ),
   
-  # Crea una opción de navegación para la ventana 3
+  #__LOAD DATA__________________________________________________________________
   tabPanel("Load Data", h1 = "Please load data",
-           fileInput(inputId = "fileSelector",
-                     label = "Load Data", 
-                     multiple = FALSE,
-                     placeholder = "No file selected",
-                     accept = ".txt",
-                     width = "100%"),
-           actionButton("Analizar", "Mostrar analisis"),
-           #shinyjs::disable("Analizar"), #Esto permite que no se pulse mientras no haya ningun archivo seleccionado
+           selectInput(inputId = "file_type_options", c("Ascii", "ECG", "RR"), label = "Select the type of file"),
+           
+         
+           conditionalPanel(
+             condition = "input.file_type_options == 'Ascii'",
+             fileInput(inputId = "fileSelector",
+                       label = "Load Data", 
+                       multiple = FALSE,
+                       placeholder = "No file selected",
+                       accept = ".txt",
+                       width = "100%")
+                      ),
+           
+           conditionalPanel(
+             condition = "input.file_type_options == 'ECG'",
+             fileInput(inputId = "fileSelector",
+                       label = "Load Data", 
+                       multiple = FALSE,
+                       placeholder = "No file selected",
+                       accept = ".ecg",
+                       width = "100%")
+           ),
+           
+           
+           conditionalPanel(
+             condition = "input.file_type_options == 'RR'",
+             fileInput(inputId = "fileSelector",
+                       label = "Load Data", 
+                       multiple = FALSE,
+                       placeholder = "No file selected",
+                       accept = ".txt",
+                       width = "100%")
+           ),
+           
+           
+           actionButton("Analyze", "Mostrar analisis"),
+           #shinyjs::disable("Analyze"), #This permits the button to not be able since a file is selected
            textOutput("cuadroAnalisis"),
            plotOutput("plotNIHR"),
            tableOutput("tabla"),
            tableOutput("tablaHistorial")
   )
+ 
+  
 )
 
 
+#_______________________________________________________________________________
+################################################################################
+##SERVER########################################################################
+################################################################################
+#_______________________________________________________________________________
+
 server <- function(input, output, session) {
-  # Agrega la lógica para ir a la ventana 2 cuando se presiona el botón
+  #__TIME ANALYSIS______________________________________________________________
   observeEvent(input$botonTime, {
     updateNavbarPage(session, "Heart Rate Variability", selected = "Time analysis")
   })
+  
+  
+  
+  #__FREQUENCY ANALYSIS_________________________________________________________
   observeEvent(input$botonFreq, {
     updateNavbarPage(session, "Heart Rate Variability", selected = "Frequency analysis")
   })
   
+  
+  #__LOAD DATA__________________________________________________________________
+  datos <- reactive({
+        archivoCargado <- input$fileSelector
+        output$archivosCargados <- renderText(name(archivoCargado))
+  })
+  
+ # observeEvent(input$file_type_options, {
+#    if (input$file_type_options == "Ascii"){
+      #updateFileInfo(session, "fileSelector", accept = ".txt")
+  #  } else if (input$file_type_options == "ECG"){
+      #updateFileInfo(session, "fileSelector", accept = ".ecg")
+    #} else if (input$file_type_options == "Beat"){
+    #  updateFileInfo(session, "fileSelector", accept = ".beat")
+    #} 
+#  })
+  
+  observeEvent(input$Analyze, {
+        data3 = data.frame()
+        
+        #This permits to enable the button when a file has been selected
+        if (!is.null(input$fileSelector)) {
+          shinyjs::enable("Analyze")
+          if(input$file_type_options == 'Ascii'){
+            format_type = "RR"
+          } else if(input$file_type_options == 'ECG'){
+            format_type = "Ecg"
+          } else if(input$file_type_options == 'RR'){
+            format_type = "RR"
+          }
+          hrv.data = preparing_analysis( input$fileSelector$name,"/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", format = format_type)
+          data2 = time_analysis(format = "RR", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
+        }
+        
+        #Plot the file in the load data file
+        output$plotNIHR <- renderPlot({
+          PlotNIHR(hrv.data)
+        })
+          
+        #Print the name of the file and its datapath
+        output$cuadroAnalisis <-  renderPrint({
+          paste0("el archivo cargado es ",  input$fileSelector$name, " y su datapath es ",input$fileSelector$datapath)
+        })
+        
+        #Shows the table with the time analysis
+        output$tabla <-  renderTable({
+          data2
+        })
+        
+        #Shows the time analysis historial
+        output$tablaHistorial <-  renderTable({
+          data3 = rbind(data3, data2)
+          data3
+        })
+  })
+  
+  
+  
+  #This is just an example using the inputs with numbers
   observeEvent(input$sumar , {
     resultado <- input$primer_numero + input$segundo_numero
     output$resultado <- renderText(resultado)
   })
   
-  datos <- reactive({
-    archivoCargado <- input$fileSelector
-    output$archivosCargados <- renderText(name(archivoCargado))
-  })
-    
- 
-  observeEvent(input$Analizar, {
-    data3 = data.frame()
-    if (!is.null(input$fileSelector)) {
-      shinyjs::enable("Analizar")
-    
-    hrv.data = preparing_analysis( input$fileSelector$name,"/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
-    data2 = time_analysis(format = "RR", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
-    #data3 = data.frame()
-    #Plot the file in the load data file
-    output$plotNIHR <- renderPlot({
-      PlotNIHR(hrv.data)
-    })
-    #time_analysis(format = "RR", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
-    #hrv.data = preparing_analysis( "nsr001_rr_secs.txt","/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
-    #3time_analysis(format = "RR", file = "nsr001_rr_secs.txt", class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
-    
-    output$cuadroAnalisis <-  renderPrint({
-      paste0("el archivo cargado es ",  input$fileSelector$name, " y su datapath es ",input$fileSelector$datapath)
-    })
-    
-    output$tabla <-  renderTable({
-    data2
-    })
-    
-    output$tablaHistorial <-  renderTable({
-      data3 = rbind(data3, data2)
-      data3
-    })
-    
-    }
-                                        
-  })
- 
 }
 
 shinyApp(ui = ui, server = server)
 
+}
 
-Ejemplo de rbind, este si me funciona, pero no en el server
+
+
+#Codigos de prueba y ejemplos
+
+'''Ejemplo de rbind, este si me funciona, pero no en el server
 datas1 = data.frame()
 datas4 = time_analysis(format = "RR", file = "nsr001_rr_secs.txt", class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
 datas1 = rbind(datas1, datas4)
-
+'''
 
 hrv.data = preparing_analysis( "nsr001_rr_secs.txt","/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
 dataframe = time_analysis(format = "RR", file = "nsr001_rr_secs.txt", class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
