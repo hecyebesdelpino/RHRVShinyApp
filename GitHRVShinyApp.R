@@ -112,7 +112,11 @@ ui <- navbarPage(
   
   #__LOAD DATA__________________________________________________________________
   tabPanel("Load Data", h1 = "Please load data",
+<<<<<<< HEAD
            selectInput(inputId = "file_type_options", c("Ascii", "ECG", "RR"), label = "Select the type of file"),
+=======
+           selectInput(inputId = "file_type_options", c("Ascii", "ECG", "Beat"), label = "Select the type of file"),
+>>>>>>> 82b1728b1188e795da0aa4b4af661fb8b1a8f403
            
          
            conditionalPanel(
@@ -137,12 +141,20 @@ ui <- navbarPage(
            
            
            conditionalPanel(
+<<<<<<< HEAD
              condition = "input.file_type_options == 'RR'",
+=======
+             condition = "input.file_type_options == 'Beat'",
+>>>>>>> 82b1728b1188e795da0aa4b4af661fb8b1a8f403
              fileInput(inputId = "fileSelector",
                        label = "Load Data", 
                        multiple = FALSE,
                        placeholder = "No file selected",
+<<<<<<< HEAD
                        accept = ".txt",
+=======
+                       accept = ".beat",
+>>>>>>> 82b1728b1188e795da0aa4b4af661fb8b1a8f403
                        width = "100%")
            ),
            
@@ -201,6 +213,7 @@ server <- function(input, output, session) {
         #This permits to enable the button when a file has been selected
         if (!is.null(input$fileSelector)) {
           shinyjs::enable("Analyze")
+<<<<<<< HEAD
           if(input$file_type_options == 'Ascii'){
             format_type = "RR"
           } else if(input$file_type_options == 'ECG'){
@@ -209,6 +222,9 @@ server <- function(input, output, session) {
             format_type = "RR"
           }
           hrv.data = preparing_analysis( input$fileSelector$name,"/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", format = format_type)
+=======
+          hrv.data = preparing_analysis( input$fileSelector$name,"/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
+>>>>>>> 82b1728b1188e795da0aa4b4af661fb8b1a8f403
           data2 = time_analysis(format = "RR", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
         }
         
@@ -234,8 +250,11 @@ server <- function(input, output, session) {
         })
   })
   
+<<<<<<< HEAD
   
   
+=======
+>>>>>>> 82b1728b1188e795da0aa4b4af661fb8b1a8f403
   #This is just an example using the inputs with numbers
   observeEvent(input$sumar , {
     resultado <- input$primer_numero + input$segundo_numero
