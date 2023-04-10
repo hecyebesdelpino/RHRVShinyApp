@@ -11,6 +11,7 @@
 #Nuevo 3
 #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
 
+
 file_validation<-function(path){
   # 1. Check if path really exists
   if (dir.exists(path) != TRUE){
@@ -85,6 +86,10 @@ freq_analysis<-function(format, files, class, rrs2, ...){
     hrv.data$HR[zero_indexes] = hr_median
     hrv.data = easy_call(hrv.data, CreateFreqAnalysis, ...)
     hrv.data = easy_call(hrv.data, CalculatePSD, doPlot = F, ...)
+    
+    hrv.data = CalculatePowerBand(hrv.data, indexFreqAnalysis = 1, size =300, shift = 30, sizesp = 2048, type = "fourier", ULFmin = 0, ULFmax = 0.03, VLFmin = 0.03, VLFmax = 0.05, LFmin = 0.05, LFmax = 0.15, HFmin = 0.15, HFmax = 0.4)
+    PlotPowerBand(hrv.data, indexFreqAnalysis = 1, ymax = 200, ymaxratio = 1.7)
+    
     name_file = list ("filename" = file)
     x1 = easy_call(hrv.data, CalculateEnergyInPSDBands, ...)
     names(x1) = c("ULF", "VLF", "LF", "HF")
@@ -108,8 +113,12 @@ wavelet_analysis<-function(format, files, class, rrs2, ...){
     hrv.data$HR[zero_indexes] = hr_median
     
     hrv.data = easy_call(hrv.data, CreateFreqAnalysis, ...)
-    hrv.data = SetVerbose(hrv.data, verb)
+    #hrv.data = SetVerbose(hrv.data, verb)
     hrv.data = easy_call(hrv.data, CalculatePowerBand, ...)
+    
+    hrv.data = CalculatePowerBand(hrv.data, indexFreqAnalysis = 1, type = "wavelet", wavelet = "la8", bandtolerance = 0.01, relative = FALSE)
+    PlotPowerBand(hrv.data, indexFreqAnalysis = 1, ymax = 700, ymaxratio = 50)
+    
     
     index = length (hrv.data$FreqAnalysis)
     resultsWavelet = hrv.data$FreqAnalysis[[index]]
@@ -164,33 +173,9 @@ ui <- navbarPage(
   
   
   #__LINEAR ANALYSIS____________________________________________________________
-  tabPanel("Linear Analysis", h1 = "Please load data",
+  tabPanel("Linear Analysis",
            selectInput(inputId = "linear_analysis_options", c("Time", "Frequency", "Wavelets"), label = "Select the type of file"),
-           
-         
-           #_____TIME ANALYSIS__________________________________________________
-           conditionalPanel(
-             condition = "input.linear_analysis_options == 'Time'",
-             selectInput(inputId = "file_type_options", c("Ascii", "ECG", "RR"), label = "Select the type of analysis", selected = 'NULL'),
-             actionButton("Analyze_Time_Button", "Show Time Analysis"),
-             #shinyjs::disable("Analyze_Time_Button"), #This permits the button to not be able since a file is selected
-             textOutput("info_time_analysis"),
-             plotOutput("plot_time_analysis"),
-             tableOutput("table_time_analysis"),
-             tableOutput("table_time_history")
-           ),
-           
-           #_____FREQUENCY ANALYSIS_____________________________________________
-           conditionalPanel(
-             condition = "input.linear_analysis_options == 'Frequency'",
-             selectInput(inputId = "file_type_options", c("Ascii", "ECG", "RR"), label = "Select the type of analysis", selected = 'NULL'),
-             actionButton("Analyze_Freq_Button", "Show Frequency Analisis"),
-             #shinyjs::disable("Analyze_Freq_Button"), #This permits the button to not be able since a file is selected
-             textOutput("info_freq_analysis"),
-             plotOutput("plot_freq_analysis"),
-             tableOutput("table_freq_analysis"),
-             tableOutput("table_freq_history")
-           ),
+           selectInput(inputId = "file_type_options", c("Ascii", "ECG", "RR"), label = "Select the type of analysis", selected = 'NULL'),
            
            conditionalPanel(
              condition = "input.file_type_options == 'Ascii'",
@@ -221,6 +206,39 @@ ui <- navbarPage(
                        placeholder = "No file selected",
                        accept = ".txt",
                        width = "100%")
+           ),
+           
+           #_____TIME ANALYSIS__________________________________________________
+           conditionalPanel(
+             condition = "input.linear_analysis_options == 'Time'",
+             actionButton("Analyze_Time_Button", "Show Time Analysis"),
+             #shinyjs::disable("Analyze_Time_Button"), #This permits the button to not be able since a file is selected
+             textOutput("info_time_analysis"),
+             plotOutput("plot_time_analysis"),
+             tableOutput("table_time_analysis"),
+             tableOutput("table_time_history")
+           ),
+           
+           #_____FREQUENCY ANALYSIS_____________________________________________
+           conditionalPanel(
+             condition = "input.linear_analysis_options == 'Frequency'",
+             actionButton("Analyze_Freq_Button", "Show Frequency Analisis"),
+             #shinyjs::disable("Analyze_Freq_Button"), #This permits the button to not be able since a file is selected
+             textOutput("info_freq_analysis"),
+             plotOutput("plot_freq_analysis"),
+             tableOutput("table_freq_analysis"),
+             tableOutput("table_freq_history")
+           ),
+           
+           #_____WAVELETS ANALYSIS_____________________________________________
+           conditionalPanel(
+             condition = "input.linear_analysis_options == 'Wavelets'",
+             actionButton("Analyze_Wave_Button", "Show Wavelets Analisis"),
+             #shinyjs::disable("Analyze_Wave_Button"), #This permits the button to not be able since a file is selected
+             textOutput("info_wave_analysis"),
+             plotOutput("plot_wave_analysis"),
+             tableOutput("table_wave_analysis"),
+             tableOutput("table_wave_history")
            )
            
     )
@@ -243,7 +261,7 @@ server <- function(input, output, session) {
   
   
   
-  #__FREQUENCY ANALYSIS_________________________________________________________
+  #__NON-LINEAR ANALYSIS_________________________________________________________
   observeEvent(input$botonNonLinear, {
     updateNavbarPage(session, "Heart Rate Variability", selected = "Non-Linear Analysis")
   })
@@ -258,7 +276,7 @@ server <- function(input, output, session) {
           shinyjs::enable("Analyze_Time_Button")
           hrv.data = preparing_analysis( input$fileSelector$name,"/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
           data2 = time_analysis(format = "RR", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
-        }
+        
         
         #Plot the file in the load data file
         output$plot_time_analysis <- renderPlot({
@@ -281,7 +299,7 @@ server <- function(input, output, session) {
           data3 = rbind(data3, data2)
           data3
         })
-        
+        }
   })
   
   
@@ -293,14 +311,14 @@ server <- function(input, output, session) {
     if (!is.null(input$fileSelector)) {
       shinyjs::enable("Analyze_Time_Button")
       hrv.data = preparing_analysis( input$fileSelector$name,"/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
-      data2 = freq_analysis(format = "RR", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
-    }
-    
+      data2 = freq_analysis(format = "RR", file = input$fileSelector$name, class = "linear", type = "fourier", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
+      
     #Plot the file in the load data file
     output$plot_freq_analysis <- renderPlot({
-      PlotNIHR(hrv.data)
-      #PlotHR(hrv.data)
-    })
+      #PlotPowerBand(hrv.data2, indexFreqAnalysis = 1, ymax = 200, ymaxratio = 1.7)
+      data2 = freq_analysis(format = "RR", file = input$fileSelector$name, class = "linear", type = "fourier", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
+      
+      })
     
     #Print the name of the file and its datapath
     output$info_freq_analysis <-  renderPrint({
@@ -314,8 +332,41 @@ server <- function(input, output, session) {
     
     #Shows the time analysis historial
     output$table_freq_history <-  renderTable({
-      data3 = rbind(data3, data2)
-      data3
+      #data3 = rbind(data3, data2)
+      #data3
+    })
+    }
+  })
+  
+  #__WAVELETS ANALYSIS______________________________________________________________
+  observeEvent(input$Analyze_Wave_Button, {
+    
+    #This permits to enable the button when a file has been selected
+    if (!is.null(input$fileSelector)) {
+      shinyjs::enable("Analyze_Wave_Button")
+      hrv.data = preparing_analysis( input$fileSelector$name,"/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
+      data2 = wavelet_analysis(format = "RR", type = "wavelet", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
+    }
+    
+    #Plot the file in the load data file
+    output$plot_wave_analysis <- renderPlot({
+      data2 = wavelet_analysis(format = "RR", type = "wavelet", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
+    })
+    
+    #Print the name of the file and its datapath
+    output$info_wave_analysis <-  renderPrint({
+      paste0("el archivo cargado es ",  input$fileSelector$name, " y su datapath es ",input$fileSelector$datapath)
+    })
+    
+    #Shows the table with the time analysis
+    output$table_wave_analysis <-  renderTable({
+      data2
+    })
+    
+    #Shows the time analysis historial
+    output$table_wave_history <-  renderTable({
+      #data3 = rbind(data3, data2)
+      #data3
     })
     
   })
@@ -345,6 +396,25 @@ datas1 = rbind(datas1, datas4)
 hrv.data = preparing_analysis( "nsr001_rr_secs.txt","/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
 dataframe = time_analysis(format = "RR", file = "nsr001_rr_secs.txt", class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
 time_analysis(format = "RR", file = "nsr001_rr_secs.txt", size = 200, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
-freq_analysis(format = "RR", file = "nsr001_rr_secs.txt", class = "linear", type = "wavelet", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
+freq_analysis(format = "RR", file = "nsr001_rr_secs.txt", class = "linear", type = "fourier", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
 wavelet_analysis(format = "RR", file = "nsr001_rr_secs.txt", class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/', type = "wavelet")
+
+
+hrv.data2 = easy_call(hrv.data, CreateFreqAnalysis,...)
+hrv.data = easy_call(hrv.data, CalculatePSD, doPlot = F,...)
+
+hrv.data2 = preparing_analysis( "nsr001_rr_secs.txt","/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
+hrv.data = easy_call(hrv.data2, InterpolateNIHR, ...)
+hrv.data2 = easy_call(hrv.data2, CreateFreqAnalysis)
+hrv.data2 = CreateFreqAnalysis(hrv.data2)
+hrv.data2 = CalculatePowerBand(hrv.data2, indexFreqAnalysis = 1, size =300, shift = 30, sizesp = 2048, type = "fourier", ULFmin = 0, ULFmax = 0.03, VLFmin = 0.03, VLFmax = 0.05, LFmin = 0.05, LFmax = 0.15, HFmin = 0.15, HFmax = 0.4)
+PlotPowerBand(hrv.data2, indexFreqAnalysis = 1, ymax = 200, ymaxratio = 1.7)
+
+
+
+hrv.data2 = preparing_analysis( "nsr018_rr_secs.txt","/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
+hrv.data2 = CreateFreqAnalysis(hrv.data2)
+hrv.data2 = CalculatePowerBand(hrv.data2, indexFreqAnalysis = 1, type = "wavelet", wavelet = "la8", bandtolerance = 0.01, relative = FALSE)
+PlotPowerBand(hrv.data2, indexFreqAnalysis = 1, ymax = 700, ymaxratio = 50)
+
 
