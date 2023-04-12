@@ -140,6 +140,55 @@ wavelet_analysis<-function(format, files, class, rrs2, ...){
   return(dataFrameMWavelet)
 }
 
+attempToCalculateTimeLag <- function(hrv.data) {
+  lag = 30
+  kTimeLag = tryCatch(
+    {
+      kTimeLag <- CalculateTimeLag(hrv.data, technique = "acf", method = "first.minimum",
+                                   lagMax = lag, doPlot=FALSE)
+      kTimeLag
+    },
+    error=function(cond) {
+      tryCatch(
+        {
+          kTimeLag <- CalculateTimeLag(hrv.data, technique = "acf", method = "first.e.decay",
+                                       lagMax = lag, doPlot=FALSE)
+          kTimeLag
+        },
+        error=function(cond) {
+          
+          tryCatch(
+            {
+              kTimeLag <- CalculateTimeLag(hrv.data, technique = "ami", method = "first.minimum",
+                                           lagMax = lag, doPlot=FALSE)
+              kTimeLag
+            },
+            error=function(cond) {
+              tryCatch(
+                {
+                  kTimeLag <- CalculateTimeLag(hrv.data, technique = "ami", method = "first.e.decay",
+                                               lagMax = lag, doPlot=FALSE)
+                  kTimeLag
+                },
+                error=function(cond) {
+                  if(verb){
+                    message("Using default timeLag for current recording...")
+                  }
+                  30
+                }
+              )
+            }
+          )
+        }
+      )
+    }
+  )
+  if(verb){
+    message(c("Time Lag for takens reconstruction: ", kTimeLag))
+  }
+  kTimeLag
+}
+
 
 library(shiny)
 library(RHRV)
