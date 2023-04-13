@@ -211,16 +211,7 @@ ui <- navbarPage(
            actionButton(inputId = "botonNonLinear", "Click for Non-Linear analysis")
   ),
   
-  #__NON-LINEAR ANALYSIS______________________________________________________________
-  tabPanel("Non-Linear Analysis", 
-           h1("Do you want to perform a non-linear analysis?"),
-           numericInput(inputId = "primer_numero", "Write the first number", value = 0),
-           numericInput(inputId = "segundo_numero", "Write the second number", value = 0),
-           actionButton(inputId = "Sumar",  "Sumar"),
-           textOutput("resultado")
-  ),
-  
-  
+
   #__LINEAR ANALYSIS____________________________________________________________
   tabPanel("Linear Analysis",
            selectInput(inputId = "file_type_options", c("Ascii", "RR", "Polar", "Suunto", "EDFPlus", "Ambit", " "), label = "Select the file type", selected = " "),
@@ -311,7 +302,16 @@ ui <- navbarPage(
              tableOutput("table_wave_history")
            )
            
-    )
+    ),
+  
+  #__NON-LINEAR ANALYSIS______________________________________________________________
+  tabPanel("Non-Linear Analysis", 
+           h1("Do you want to perform a non-linear analysis?"),
+           numericInput(inputId = "primer_numero", "Write the first number", value = 0),
+           numericInput(inputId = "segundo_numero", "Write the second number", value = 0),
+           actionButton(inputId = "Sumar",  "Sumar"),
+           textOutput("resultado")
+  )
  
   
 )
