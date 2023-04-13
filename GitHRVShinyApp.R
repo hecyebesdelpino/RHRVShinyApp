@@ -301,6 +301,7 @@ ui <- fluidPage(
              textOutput("info_freq_analysis2"),
              tableOutput("table_freq_history"),
              
+             
            ),
            
            #_____WAVELETS ANALYSIS_____________________________________________
