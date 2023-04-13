@@ -11,7 +11,7 @@
 #Nuevo 3
 #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
 
-
+if(interactive()){
 file_validation<-function(path){
   # 1. Check if path really exists
   if (dir.exists(path) != TRUE){
@@ -189,6 +189,7 @@ attempToCalculateTimeLag <- function(hrv.data) {
   kTimeLag
 }
 
+}
 
 library(shiny)
 library(RHRV)
@@ -201,26 +202,28 @@ library(shinyjs)
 ################################################################################
 #_______________________________________________________________________________
 if(interactive()){
-ui <- navbarPage(
-  title = "Heart Rate Variability", 
+ui <- fluidPage(
+  
+  tabsetPanel(
+    tabPanel(
+    title = "Heart Rate Variability", 
   #__HOME_______________________________________________________________________
-  tabPanel("Home", 
-           h1("Welcome to the HRV App"), 
-           h2("Select what you want to do"),
-           actionButton(inputId = "botonLinear", "Click for Linear analysis"),
-           actionButton(inputId = "botonNonLinear", "Click for Non-Linear analysis")
-  ),
-  
-  #__NON-LINEAR ANALYSIS______________________________________________________________
-  tabPanel("Non-Linear Analysis", 
-           h1("Do you want to perform a non-linear analysis?"),
-           numericInput(inputId = "primer_numero", "Write the first number", value = 0),
-           numericInput(inputId = "segundo_numero", "Write the second number", value = 0),
-           actionButton(inputId = "Sumar",  "Sumar"),
-           textOutput("resultado")
+  #tabPanel("Home", 
+          h1("Welcome to the HRV App"), 
+          h3("This app will allow you to obtain some graphical and statistical studies of your HRV samples"),
+          h3("Just go through the different tabs and try them all"),
+          h3("This app reads Ascii, RR, Ambit, Suunto and EDFPlus files"),
+          h3("If you have any problem, please contact us")
+  #         h2("Select what you want to do"),
+  #         actionButton(inputId = "botonLinear", "Click for Linear analysis"),
+  #         actionButton(inputId = "botonNonLinear", "Click for Non-Linear analysis"),
+  #         actionButton(inputId = "start", "Start")
+  #),
   ),
   
   
+  
+
   #__LINEAR ANALYSIS____________________________________________________________
   tabPanel("Linear Analysis",
            selectInput(inputId = "file_type_options", c("Ascii", "RR", "Polar", "Suunto", "EDFPlus", "Ambit", " "), label = "Select the file type", selected = " "),
@@ -274,6 +277,7 @@ ui <- navbarPage(
            #_____TIME ANALYSIS__________________________________________________
            conditionalPanel(
              condition = "input.file_type_options != ' ' && input.linear_analysis_options == 'Time'",
+             
              sliderInput("window_size_slider", label = "Chose the window size", min = 50, max = 600, step = 1, value = 300),
              actionButton("Analyze_Time_Button", "Show Time Analysis"),
              #shinyjs::disable("window_size_slider"),#This permits the button to not be able since a file is selected
@@ -311,11 +315,19 @@ ui <- navbarPage(
              tableOutput("table_wave_history")
            )
            
-    )
+    ),
+  
+  #__NON-LINEAR ANALYSIS______________________________________________________________
+  tabPanel("Non-Linear Analysis", 
+           h1("Do you want to perform a non-linear analysis?"),
+           selectInput(inputId = "non_linear_analysis_options", c("Saphiro", "Posthoc", "Statistical frequency analysis","Statistical time analysis", " "), label = "Select the analysis", selected = " "),
+           textOutput("non_linear_results")
+  )
  
   
 )
 
+)
 
 #_______________________________________________________________________________
 ################################################################################
