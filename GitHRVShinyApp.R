@@ -221,7 +221,24 @@ ui <- fluidPage(
   #),
   ),
   
-  
+  #__MULTIPLE FILES_____________________________________________________________
+  tabPanel("Multiple Files Analysis", 
+           selectInput(inputId = "file_type_options", c("Ascii", "RR", "Polar", "Suunto", "EDFPlus", "Ambit", " "), label = "Select the file type", selected = " "),
+           
+           conditionalPanel(
+             condition = "input.file_type_options == 'Ascii'",
+             fileInput(inputId = "fileSelector",
+                       label = "Load Data", 
+                       multiple = TRUE,
+                       placeholder = "No file selected",
+                       accept = ".txt",
+                       width = "100%"
+             )
+           ),
+           textOutput("info_multiple_analysis")
+           
+          
+  ),
   
 
   #__LINEAR ANALYSIS____________________________________________________________
@@ -341,6 +358,14 @@ server <- function(input, output, session) {
   observeEvent(input$botonLinear, {
     updateNavbarPage(session, "Heart Rate Variability", selected = "Linear Analysis")
   })
+  
+  output$info_multiple_analysis <-  renderPrint({
+    cat(paste0("El archivo cargado es -> ",  input$fileSelector$name, " y su datapath es: ",input$fileSelector$datapath))
+    rutas_archivos <- normalizePath(input$fileSelector$datapath, mustWork = NA)
+    cat(paste0("El archivo cargado es -> ",  input$fileSelector$name, " y su datapath es: ",rutas_archivos))
+    })
+  
+ 
   
   
   
@@ -487,6 +512,8 @@ datas4 = time_analysis(format = "RR", file = "nsr001_rr_secs.txt", class = "line
 datas1 = rbind(datas1, datas4)
 '''
 
+hrv.data = preparing_analysis( "Poblacion_1","/Users/hecyebesdelpino/Desktop/TFG/", "RR")
+
 hrv.data = preparing_analysis( "nsr001_rr_secs.txt","/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
 dataframe = time_analysis(format = "RR", file = "nsr001_rr_secs.txt", class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
 time_analysis(format = "RR", file = "nsr001_rr_secs.txt", size = 200, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
@@ -511,4 +538,12 @@ hrv.data2 = CreateFreqAnalysis(hrv.data2)
 hrv.data2 = CalculatePowerBand(hrv.data2, indexFreqAnalysis = 1, type = "wavelet", wavelet = "la8", bandtolerance = 0.01, relative = FALSE)
 PlotPowerBand(hrv.data2, indexFreqAnalysis = 1, ymax = 700, ymaxratio = 50)
 
+file_names = list.files("/Users/hecyebesdelpino/Desktop/TFG/Poblacion_1/")
+preparing_analysis(file_names, "/Users/hecyebesdelpino/Desktop/TFG/Poblacion_1/", "RR")
+dataframe = time_analysis("RR", file_names, "Poblacion_1", "/Users/hecyebesdelpino/Desktop/TFG/Poblacion_1/")
 
+file_names_2 = list.files("/Users/hecyebesdelpino/Desktop/TFG/Poblacion_2/")
+preparing_analysis(file_names_2, "/Users/hecyebesdelpino/Desktop/TFG/Poblacion_2/", "RR")
+dataframe_2 = time_analysis("RR", file_names_2, "Poblacion_2", "/Users/hecyebesdelpino/Desktop/TFG/Poblacion_2/")
+
+dataframe = rbind(dataframe, dataframe_2)
