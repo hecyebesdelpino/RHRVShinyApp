@@ -227,7 +227,16 @@ ui <- fluidPage(
            
            conditionalPanel(
              condition = "input.file_type_options == 'Ascii'",
+             h3("Load the first files to study"),
              fileInput(inputId = "fileSelector",
+                       label = "Load Data", 
+                       multiple = TRUE,
+                       placeholder = "No file selected",
+                       accept = ".txt",
+                       width = "100%"
+             ),
+             h3("Load the second files to study"),
+             fileInput(inputId = "fileSelector2",
                        label = "Load Data", 
                        multiple = TRUE,
                        placeholder = "No file selected",
@@ -235,9 +244,11 @@ ui <- fluidPage(
                        width = "100%"
              )
            ),
-           textOutput("info_multiple_analysis")
-           
-          
+           textOutput("info_multiple_analysis"),
+           actionButton("Analyze_Multi_Button", "Show Time Analysis"),
+           textOutput("info_multi_analysis"),
+           tableOutput("table_multi_analysis"),
+           tableOutput("table_multi2_analysis")
   ),
   
 
@@ -359,12 +370,35 @@ server <- function(input, output, session) {
     updateNavbarPage(session, "Heart Rate Variability", selected = "Linear Analysis")
   })
   
+  #__MULTIPLE ANALYSIS__________________________________________________
   output$info_multiple_analysis <-  renderPrint({
     cat(paste0("El archivo cargado es -> ",  input$fileSelector$name, " y su datapath es: ",input$fileSelector$datapath))
     rutas_archivos <- normalizePath(input$fileSelector$datapath, mustWork = NA)
     cat(paste0("El archivo cargado es -> ",  input$fileSelector$name, " y su datapath es: ",rutas_archivos))
-    })
+  })
   
+  observeEvent(input$Analyze_Multi_Button, {
+    output$info_multiple_analysis <-  renderPrint({
+      cat(paste0("El archivo cargado es -> ",  input$fileSelector$name, " y su datapath es: ",input$fileSelector$datapath))
+      rutas_archivos <- normalizePath(input$fileSelector$datapath, mustWork = NA)
+      cat(paste0("El archivo cargado es -> ",  input$fileSelector$name, " y su datapath es: ",rutas_archivos))
+      #rutas_archivos2 <- rstudioapi::selectFile()
+      #cat(paste0("El archivo cargado es -> ",  input$fileSelector$name, " y su datapath es: ",rutas_archivos2))
+    })
+    
+    output$table_multi_analysis <-  renderTable({
+      #file_names = list.files("/Users/hecyebesdelpino/Desktop/TFG/Poblacion_1/")
+      file_names = input$fileSelector$name
+      file_names2 = input$fileSelector2$name
+      #preparing_analysis(file_names, "/Users/hecyebesdelpino/Desktop/TFG/Poblacion_1/", "RR")
+      #dataframe = data.frame()
+      dataframe = time_analysis("RR", file_names, class = "Poblacion_1", "/Users/hecyebesdelpino/Desktop/TFG/Poblacion_1/")
+      dataframe2 = time_analysis("RR", file_names2, class = "Poblacion_2", "/Users/hecyebesdelpino/Desktop/TFG/Poblacion_2/")
+      
+      dataframe = rbind(dataframe, dataframe2)
+      dataframe
+    })
+  })
  
   
   
