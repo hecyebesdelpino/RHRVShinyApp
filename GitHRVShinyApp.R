@@ -315,6 +315,7 @@ ui <- fluidPage(
              tableOutput("table_time_analysis"),
              textOutput("info_time_analysis2"),
              tableOutput("table_time_history")
+             
            ),
            
            #_____FREQUENCY ANALYSIS_____________________________________________
@@ -398,6 +399,12 @@ server <- function(input, output, session) {
       dataframe = rbind(dataframe, dataframe2)
       dataframe
     })
+    
+    #folder_1 = "/Users/hecyebesdelpino/Desktop/TFG/Poblacion_1/"
+    #folder_2 = "/Users/hecyebesdelpino/Desktop/TFG/Poblacion_2/"
+    #folders = c(folder_1, folder_2)
+    #RHRVEasy(folders)
+    
   })
  
   
