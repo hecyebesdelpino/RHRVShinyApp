@@ -223,38 +223,29 @@ ui <- fluidPage(
   
   #__MULTIPLE FILES_____________________________________________________________
   tabPanel("Multiple Files Analysis", 
-           selectInput(inputId = "file_type_options", c("Ascii", "RR", "Polar", "Suunto", "EDFPlus", "Ambit", " "), label = "Select the file type", selected = " "),
+           img(src = "/Users/hecyebesdelpino/Desktop/HRV-Definition-and-Image.jpg"),
+           tags$img(src = "/Users/hecyebesdelpino/Desktop/HRV-Definition-and-Image.jpg", height = 200),
+           sidebarPanel(
+             column(width = 2),
+             h3("Choose the first folder by clicking on the button below"),
+             actionButton("select_folder", "Seleccionar carpeta"),
+             hr(),
+             column(width = 2),
+             h3("Choose the second folder by clicking on the button below"),
+             actionButton("select_folder_2", "Seleccionar carpeta 2")
+           ) ,
            
-           actionButton("select_folder", "Seleccionar carpeta"),
-           actionButton("select_folder_2", "Seleccionar carpeta 2"),
-           actionButton("RHRV", "RHRV study"),
-           
-           conditionalPanel(
-             condition = "input.file_type_options == 'Ascii'",
-             h3("Load the first folder"),
-             fileInput(inputId = "fileSelector",
-                       label = "Load Data", 
-                       multiple = TRUE,
-                       placeholder = "No file selected",
-                       accept = "directory",
-                       width = "100%"
+           mainPanel(
+             conditionalPanel(
+               condition = "input.select_folder > 0 && input.select_folder_2 >0",
+               actionButton("RHRV", "RHRV study")
              ),
-             h3("Load the second folder"),
-             fileInput(inputId = "fileSelector2",
-                       label = "Load Data", 
-                       multiple = TRUE,
-                       placeholder = "No file selected",
-                       accept = ".txt",
-                       width = "100%"
-             )
-           ),
-           textOutput("info_multiple_analysis"),
-           actionButton("Analyze_Multi_Button", "Show Time Analysis"),
-           textOutput("info_multi_analysis"),
-           tableOutput("table_multi_analysis"),
-           tableOutput("table_multi2_analysis")
+             textOutput("info_multiple_analysis"),
+             tableOutput("table_multi_analysis")
+           )
+           
+           
   ),
-  
 
   #__LINEAR ANALYSIS____________________________________________________________
   tabPanel("Linear Analysis",
@@ -391,33 +382,9 @@ server <- function(input, output, session) {
     output$info_multiple_analysis <-  renderPrint({
       folders = c(folder_path_1, folder_path_2)
       #cat(paste0(folder_path))
-      capture.output(RHRVEasy(folders))
-    })
-  })
-  
-  observeEvent(input$Analyze_Multi_Button, {
-    output$info_multiple_analysis <-  renderPrint({
-      #folder_1 = "/Users/hecyebesdelpino/Desktop/TFG/Poblacion_1/"
-      #folder_2 = "/Users/hecyebesdelpino/Desktop/TFG/Poblacion_2/"
-      #folders = c(folder_1, folder_2)
-      #RHRVEasy(folders)
-      cat(paste0(dirname(input$fileSelector)))
-      cat(paste0(dirname(input$fileSelector2)))
-      
+      cat(paste0(capture.output(RHRVEasy(folders))))
     })
     
-    output$table_multi_analysis <-  renderTable({
-      #file_names = list.files("/Users/hecyebesdelpino/Desktop/TFG/Poblacion_1/")
-      file_names = input$fileSelector$name
-      file_names2 = input$fileSelector2$name
-      #preparing_analysis(file_names, "/Users/hecyebesdelpino/Desktop/TFG/Poblacion_1/", "RR")
-      #dataframe = data.frame()
-      dataframe = time_analysis("RR", file_names, class = "Poblacion_1", "/Users/hecyebesdelpino/Desktop/TFG/Poblacion_1/")
-      dataframe2 = time_analysis("RR", file_names2, class = "Poblacion_2", "/Users/hecyebesdelpino/Desktop/TFG/Poblacion_2/")
-      
-      dataframe = rbind(dataframe, dataframe2)
-      dataframe
-    })
   })
     
     #folder_1 = "/Users/hecyebesdelpino/Desktop/TFG/Poblacion_1/"
