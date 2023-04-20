@@ -225,17 +225,21 @@ ui <- fluidPage(
   tabPanel("Multiple Files Analysis", 
            selectInput(inputId = "file_type_options", c("Ascii", "RR", "Polar", "Suunto", "EDFPlus", "Ambit", " "), label = "Select the file type", selected = " "),
            
+           actionButton("select_folder", "Seleccionar carpeta"),
+           actionButton("select_folder_2", "Seleccionar carpeta 2"),
+           actionButton("RHRV", "RHRV study"),
+           
            conditionalPanel(
              condition = "input.file_type_options == 'Ascii'",
-             h3("Load the first files to study"),
+             h3("Load the first folder"),
              fileInput(inputId = "fileSelector",
                        label = "Load Data", 
                        multiple = TRUE,
                        placeholder = "No file selected",
-                       accept = ".txt",
+                       accept = "directory",
                        width = "100%"
              ),
-             h3("Load the second files to study"),
+             h3("Load the second folder"),
              fileInput(inputId = "fileSelector2",
                        label = "Load Data", 
                        multiple = TRUE,
@@ -372,19 +376,34 @@ server <- function(input, output, session) {
   })
   
   #__MULTIPLE ANALYSIS__________________________________________________
-  output$info_multiple_analysis <-  renderPrint({
-    cat(paste0("El archivo cargado es -> ",  input$fileSelector$name, " y su datapath es: ",input$fileSelector$datapath))
-    rutas_archivos <- normalizePath(input$fileSelector$datapath, mustWork = NA)
-    cat(paste0("El archivo cargado es -> ",  input$fileSelector$name, " y su datapath es: ",rutas_archivos))
+  observeEvent(input$select_folder, {
+    #folder_path <- file.choose(new = FALSE, directory = TRUE)
+    folder_path_1 <- dirname(file.choose(new = FALSE))
+    assign("folder_path_1", folder_path_1, envir = .GlobalEnv)
+  })
+  
+  observeEvent(input$select_folder_2, {
+    folder_path_2 <- dirname(file.choose(new = FALSE))
+    assign("folder_path_2", folder_path_2, envir = .GlobalEnv)
+  })
+  
+  observeEvent(input$RHRV, {
+    output$info_multiple_analysis <-  renderPrint({
+      folders = c(folder_path_1, folder_path_2)
+      #cat(paste0(folder_path))
+      capture.output(RHRVEasy(folders))
+    })
   })
   
   observeEvent(input$Analyze_Multi_Button, {
     output$info_multiple_analysis <-  renderPrint({
-      cat(paste0("El archivo cargado es -> ",  input$fileSelector$name, " y su datapath es: ",input$fileSelector$datapath))
-      rutas_archivos <- normalizePath(input$fileSelector$datapath, mustWork = NA)
-      cat(paste0("El archivo cargado es -> ",  input$fileSelector$name, " y su datapath es: ",rutas_archivos))
-      #rutas_archivos2 <- rstudioapi::selectFile()
-      #cat(paste0("El archivo cargado es -> ",  input$fileSelector$name, " y su datapath es: ",rutas_archivos2))
+      #folder_1 = "/Users/hecyebesdelpino/Desktop/TFG/Poblacion_1/"
+      #folder_2 = "/Users/hecyebesdelpino/Desktop/TFG/Poblacion_2/"
+      #folders = c(folder_1, folder_2)
+      #RHRVEasy(folders)
+      cat(paste0(dirname(input$fileSelector)))
+      cat(paste0(dirname(input$fileSelector2)))
+      
     })
     
     output$table_multi_analysis <-  renderTable({
@@ -399,13 +418,14 @@ server <- function(input, output, session) {
       dataframe = rbind(dataframe, dataframe2)
       dataframe
     })
+  })
     
     #folder_1 = "/Users/hecyebesdelpino/Desktop/TFG/Poblacion_1/"
     #folder_2 = "/Users/hecyebesdelpino/Desktop/TFG/Poblacion_2/"
     #folders = c(folder_1, folder_2)
     #RHRVEasy(folders)
     
-  })
+  
  
   
   
