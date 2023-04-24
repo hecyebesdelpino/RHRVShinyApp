@@ -224,15 +224,16 @@ ui <- fluidPage(
   #__MULTIPLE FILES_____________________________________________________________
   tabPanel("Multiple Files Analysis", 
            img(src = "/Users/hecyebesdelpino/Desktop/HRV-Definition-and-Image.jpg"),
-           tags$img(src = "/Users/hecyebesdelpino/Desktop/HRV-Definition-and-Image.jpg", height = 200),
            sidebarPanel(
-             column(width = 2),
-             h3("Choose the first folder by clicking on the button below"),
-             actionButton("select_folder", "Seleccionar carpeta"),
+             
+             p(strong("Choose the first folder by clicking on the button below")),
+             column(width = 1),
+             actionButton("select_folder", "Select folder 1"),
              hr(),
-             column(width = 2),
-             h3("Choose the second folder by clicking on the button below"),
-             actionButton("select_folder_2", "Seleccionar carpeta 2")
+             
+             p(strong("Choose the second folder by clicking on the button below")),
+             column(width = 1),
+             actionButton("select_folder_2", "Select folder 2")
            ) ,
            
            mainPanel(
