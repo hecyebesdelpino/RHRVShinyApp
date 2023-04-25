@@ -223,30 +223,42 @@ ui <- fluidPage(
   
   #__MULTIPLE FILES_____________________________________________________________
   tabPanel("Multiple Files Analysis", 
-           img(src = "/Users/hecyebesdelpino/Desktop/HRV-Definition-and-Image.jpg"),
-           sidebarPanel(
-             
-             p(strong("Choose the first folder by clicking on the button below")),
-             column(width = 1),
-             actionButton("select_folder", "Select folder 1"),
-             hr(),
-             
-             p(strong("Choose the second folder by clicking on the button below")),
-             column(width = 1),
-             actionButton("select_folder_2", "Select folder 2")
-           ) ,
            
-           mainPanel(
-             conditionalPanel(
-               condition = "input.select_folder > 0 && input.select_folder_2 >0",
-               actionButton("RHRV", "RHRV study")
+           sidebarLayout(
+             sidebarPanel(
+               numericInput(inputId = "num_samples", label = "Number of samples", value = 1, min = 1),
+               uiOutput(outputId = "samples")
+               
+               
              ),
-             textOutput("info_multiple_analysis"),
-             tableOutput("table_multi_analysis")
-           )
-           
-           
-  ),
+             mainPanel(
+               
+               
+               conditionalPanel(
+                 
+                 for (i in input[[num_samples]]) {
+                   file_input <- input[[paste0("file", i)]]
+                   if (is.null(file_input)) {
+                   }
+                   else{
+                     sliderInput("significance_slider", "Significance level", min = 0.01, max = 0.99, step = 0.01, value = 0.05)
+                     actionButton("RHRV", "RHRV study")
+                   }
+                 }
+                 # condition = "total_samples == samples",
+                 # sliderInput("significance_slider", "Significance level", min = 0.01, max = 0.99, step = 0.01, value = 0.05),
+                 # actionButton("RHRV", "RHRV study")
+               ),
+               
+               conditionalPanel(
+                 condition = "input.RHRV > 0",
+                 p("Calculating.... Please wait, it could take some minutes")
+               ),
+               
+               textOutput("info_multiple_analysis"),
+               tableOutput("table_multi_analysis")
+             )
+           ),
 
   #__LINEAR ANALYSIS____________________________________________________________
   tabPanel("Linear Analysis",
