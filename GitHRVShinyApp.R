@@ -228,36 +228,30 @@ ui <- fluidPage(
              sidebarPanel(
                numericInput(inputId = "num_samples", label = "Number of samples", value = 1, min = 1),
                uiOutput(outputId = "samples")
-               
-               
              ),
+             
              mainPanel(
-               
-               
                conditionalPanel(
+                 conditionalPanel(
+                   condition = !is.null(input[[paste0("file", input$num_samples)]]),
+                   sliderInput("significance_slider", "Significance level", min = 0.01, max = 0.99, step = 0.01, value = 0.05),
+                   actionButton("RHRV", "RHRV study")
+                 ),
                  
-                 for (i in input[[num_samples]]) {
-                   file_input <- input[[paste0("file", i)]]
-                   if (is.null(file_input)) {
-                   }
-                   else{
-                     sliderInput("significance_slider", "Significance level", min = 0.01, max = 0.99, step = 0.01, value = 0.05)
-                     actionButton("RHRV", "RHRV study")
-                   }
-                 }
-                 # condition = "total_samples == samples",
-                 # sliderInput("significance_slider", "Significance level", min = 0.01, max = 0.99, step = 0.01, value = 0.05),
-                 # actionButton("RHRV", "RHRV study")
-               ),
-               
-               conditionalPanel(
-                 condition = "input.RHRV > 0",
-                 p("Calculating.... Please wait, it could take some minutes")
-               ),
-               
-               textOutput("info_multiple_analysis"),
-               tableOutput("table_multi_analysis")
+                 
+                 conditionalPanel(
+                   condition = "input.RHRV > 0",
+                   p("Calculating.... Please wait, it could take some minutes")
+                 ),
+                 
+                 textOutput("info_multiple_analysis")
+                 # tableOutput("table_multi_analysis")
+               )
              )
+             
+             
+           )
+             
            ),
 
   #__LINEAR ANALYSIS____________________________________________________________
