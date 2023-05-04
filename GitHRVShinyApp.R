@@ -223,35 +223,37 @@ ui <- fluidPage(
   
   #__MULTIPLE FILES_____________________________________________________________
   tabPanel("Multiple Files Analysis", 
-           
            sidebarLayout(
              sidebarPanel(
                numericInput(inputId = "num_samples", label = "Number of samples", value = 1, min = 1),
-               uiOutput(outputId = "samples")
+               uiOutput(outputId = "samples"),
+               uiOutput("samples2")
              ),
              
              mainPanel(
+               textOutput("info"),
+               
+               
                conditionalPanel(
-                 conditionalPanel(
-                   condition = !is.null(input[[paste0("file", input$num_samples)]]),
-                   sliderInput("significance_slider", "Significance level", min = 0.01, max = 0.99, step = 0.01, value = 0.05),
-                   actionButton("RHRV", "RHRV study")
-                 ),
+                 # condition = !is.null(input[[paste0("file", input$num_samples)]]),
                  
-                 
-                 conditionalPanel(
-                   condition = "input.RHRV > 0",
-                   p("Calculating.... Please wait, it could take some minutes")
-                 ),
-                 
-                 textOutput("info_multiple_analysis")
-                 # tableOutput("table_multi_analysis")
-               )
+                 condition = "input.num_samples > 0",
+                 sliderInput("significance_slider", "Significance level", min = 0.01, max = 0.99, step = 0.01, value = 0.05),
+                 actionButton("RHRV", "RHRV study")
+               ),
+               
+               
+               conditionalPanel(
+                 condition = "input.RHRV > 0",
+                 p("Calculating.... Please wait, it could take some minutes"),
+                 #p(folder_paths)
+               ),
+               
+               textOutput("info_multiple_analysis")
+               # tableOutput("table_multi_analysis")
              )
-             
-             
-           )
-             
+           
+  
            ),
 
   #__LINEAR ANALYSIS____________________________________________________________
@@ -359,7 +361,7 @@ ui <- fluidPage(
   
 )
 
-)
+
 
 #_______________________________________________________________________________
 ################################################################################
@@ -374,22 +376,63 @@ server <- function(input, output, session) {
   })
   
   #__MULTIPLE ANALYSIS__________________________________________________
-  observeEvent(input$select_folder, {
-    #folder_path <- file.choose(new = FALSE, directory = TRUE)
-    folder_path_1 <- dirname(file.choose(new = FALSE))
-    assign("folder_path_1", folder_path_1, envir = .GlobalEnv)
+  output$samples <- renderUI({
+    num_samples <- input$num_samples
+    samples <- lapply(seq_len(num_samples), function(i) {
+      actionButton(inputId = paste0("file", i), label = paste0("Select file ", i))
+    })
+    do.call(tagList, samples)
   })
   
-  observeEvent(input$select_folder_2, {
-    folder_path_2 <- dirname(file.choose(new = FALSE))
-    assign("folder_path_2", folder_path_2, envir = .GlobalEnv)
+  
+  # Initialize the path files list
+  file_paths <- reactiveVal(list())
+  #directory = list()
+  
+  # Observes each button and updates the path list
+  observe({
+    num_samples <- input$num_samples
+    # for (i in seq_len(num_samples)) {
+    for (i in num_samples) {
+      btn_id <- paste0("file", i)
+      observeEvent(input[[btn_id]], {
+        path <- dirname(file.choose())
+        current_paths <- file_paths()
+        current_paths[[i]] <- path
+        file_paths(current_paths)
+        assign("directory", current_paths, envir = .GlobalEnv)
+      })
+    }
+    
   })
+  
+  # Initialize the path files list
+  #file_paths <- list(NULL)
+  
+  # Observes each button and updates the path list
+  # observe({
+  #   num_samples <- input$num_samples
+  #   # for (i in seq_len(num_samples)) {
+  #   file_paths <- list(NULL)
+  #   for (i in num_samples) {
+  #     btn_id <- paste0("file", i)
+  #     observeEvent(input[[btn_id]], {
+  #       path <- dirname(file.choose())
+  #       file_paths = c(file_paths, path)
+  #     })
+  #   }
+  #   assign("directory", file_paths, envir = .GlobalEnv)
+  # })
+  
+  # output$info <- renderPrint({
+  #   print(directory)
+  # })
   
   observeEvent(input$RHRV, {
-    output$info_multiple_analysis <-  renderPrint({
-      folders = c(folder_path_1, folder_path_2)
-      #cat(paste0(folder_path))
-      cat(paste0(capture.output(RHRVEasy(folders))))
+    output$info_multiple_analysis <-renderPrint({
+      #cat(paste0(capture.output(RHRVEasy(file_paths))))
+      cat(paste0("Files have been uploaded and studied from ", directory))
+      RHRVEasy(directory)
     })
     
   })
