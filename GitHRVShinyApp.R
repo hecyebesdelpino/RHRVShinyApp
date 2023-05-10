@@ -886,7 +886,7 @@
         #reporta Dunn sin haber reportado ANOVA
         #a2b=RHRVEasy(folders =c("C:\\rrs\\RHRVEasy\\rrs\\normal",
         #                        "C:\\rrs\\RHRVEasy\\rrs\\chf",
-        #                        "C:\\rrs\\RHRVEasy\\rrs\\normal_half", 
+        #                        "C:\\rrs\\RHRVEasy\\rrs\\normal_half",
         #                        "C:\\rrs\\RHRVEasy\\rrs\\chf_half"), significance_level = 0.05)
         
         #@TODO Lo mismo en otros sitios
@@ -1098,237 +1098,273 @@
 }
 
 
-library(shiny)
-library(RHRV)
-#Library ShinyJS permits enable and disable botons
-library(shinyjs)
 
-#_______________________________________________________________________________
-################################################################################
-##USER##########################################################################
-################################################################################
-#_______________________________________________________________________________
 {
-ui <- fluidPage(
+  library(shiny)
+  library(RHRV)
+  library(shinyjs)
   
-  tabsetPanel(
-    #__HOME_______________________________________________________________________
-    tabPanel(
-    title = "Heart Rate Variability", 
-          h1("Welcome to the HRV App"), 
-          p("This app will allow you to obtain some graphical and statistical studies of your HRV samples"),
-          p("Just go through the different tabs and try them all"),
-          p("This app reads Ascii, RR, Ambit, Suunto and EDFPlus files"),
-          p("If you have any problem, please contact us")
-  ),
+  ##USER##########################################################################
   
-  #__MULTIPLE FILES_____________________________________________________________
-  tabPanel("Multiple Files Analysis", 
-           sidebarLayout(
-             sidebarPanel(
-               numericInput(inputId = "num_samples", label = "Number of samples", value = 1, min = 1),
-               uiOutput(outputId = "samples"),
-               uiOutput("samples2")
-             ),
-             
-             mainPanel(
-               textOutput("info"),
-               
-               
-               conditionalPanel(
-                 # condition = !is.null(input[[paste0("file", input$num_samples)]]),
+  ui <- fluidPage(
+    
+    tags$head(
+      # tags$style(HTML("
+      #     .boton-pulsado {
+      #      background-color: green;
+      #      color: white;
+      #      }"
+      
+      tags$style(HTML("
+      .boton-pulsado {
+        background-color: green !important;
+        color: white !important;
+      }"
+                      
+      )),),
+    
+    tabsetPanel(
+      #__HOME_______________________________________________________________________
+      tabPanel(
+        title = "Heart Rate Variability",
+        h1("Welcome to the HRV App"),
+        p("This app will allow you to obtain some graphical and statistical studies of your HRV samples"),
+        p("Just go through the different tabs and try them all"),
+        p("This app reads Ascii, RR, Ambit, Suunto and EDFPlus files"),
+        p("If you have any problem, please contact us")
+      ),
+      
+      #__MULTIPLE FILES_____________________________________________________________
+      tabPanel("Multiple Files Analysis",
+               sidebarLayout(
+                 sidebarPanel(
+                   numericInput(inputId = "num_samples", label = "Number of samples", value = 1, min = 1),
+                   actionButton("go", "START"),
+                   uiOutput(outputId = "samples"),
+                   uiOutput("samples2"),
+                   textOutput("info2")
+                 ),
                  
-                 condition = "input.num_samples > 0",
-                 sliderInput("significance_slider", "Significance level", min = 0.01, max = 0.99, step = 0.01, value = 0.05),
-                 actionButton("RHRV", "RHRV study")
-               ),
+                 mainPanel(
+                   textOutput("info"),
+                   
+                   
+                   conditionalPanel(
+                     # condition = !is.null(input[[paste0("file", input$num_samples)]]),
+                     condition = ("input.go > 0"),
+                     #condition = "input.num_samples > 0",
+                     p(" "),
+                     sliderInput("significance_slider", "Significance level", min = 0.001, max = 0.99, step = 0.001, value = 0.05),
+                     p(" "),
+                     actionButton("RHRV", "RHRV study")
+                   ),
+                   
+                   
+                   conditionalPanel(
+                     condition = "input.RHRV > 0",
+                     p("Calculating.... Please wait, it could take some minutes"),
+                     #p(folder_paths)
+                   ),
+                   
+                   textOutput("info_multiple_analysis")
+                   # tableOutput("table_multi_analysis")
+                 )
+               )
                
+      ),
+      
+      #__LINEAR ANALYSIS____________________________________________________________
+      tabPanel("Linear Analysis",
+               selectInput(inputId = "file_type_options", c("Ascii", "RR", "Polar", "Suunto", "EDFPlus", "Ambit", " "), label = "Select the file type", selected = " "),
                
                conditionalPanel(
-                 condition = "input.RHRV > 0",
-                 p("Calculating.... Please wait, it could take some minutes"),
-                 #p(folder_paths)
+                 condition = "input.file_type_options == 'Ascii'",
+                 fileInput(inputId = "fileSelector",
+                           label = "Load Data",
+                           multiple = FALSE,
+                           placeholder = "No file selected",
+                           accept = ".txt",
+                           width = "100%"
+                 )
                ),
                
-               textOutput("info_multiple_analysis")
-               # tableOutput("table_multi_analysis")
-             )
-           )
-           
-           ),
-
-  #__LINEAR ANALYSIS____________________________________________________________
-  tabPanel("Linear Analysis",
-           selectInput(inputId = "file_type_options", c("Ascii", "RR", "Polar", "Suunto", "EDFPlus", "Ambit", " "), label = "Select the file type", selected = " "),
-           
-           conditionalPanel(
-             condition = "input.file_type_options == 'Ascii'",
-             fileInput(inputId = "fileSelector",
-                       label = "Load Data", 
-                       multiple = FALSE,
-                       placeholder = "No file selected",
-                       accept = ".txt",
-                       width = "100%"
-                       )
-           ),
-           
-           conditionalPanel(
-             condition = "input.file_type_options == 'Polar'",
-             fileInput(inputId = "fileSelector",
-                       label = "Load Data", 
-                       multiple = FALSE,
-                       placeholder = "No file selected",
-                       accept = ".polar",
-                       width = "100%")
-           ),
-           
-           conditionalPanel(
-             condition = "input.file_type_options == 'RR'",
-             fileInput(inputId = "fileSelector",
-                       label = "Load Data", 
-                       multiple = FALSE,
-                       placeholder = "No file selected",
-                       accept = ".txt",
-                       width = "100%")
-           ),
-           
-           conditionalPanel(
-             condition = "input.file_type_options == 'Suunto'",
-             fileInput(inputId = "fileSelector",
-                       label = "Load Data", 
-                       multiple = FALSE,
-                       placeholder = "No file selected",
-                       accept = ".txt",
-                       width = "100%")
-           ),
-           
-           conditionalPanel(
-             condition = "input.file_type_options != ' '",
-             selectInput(inputId = "linear_analysis_options", c("Time", "Frequency", "Wavelets", " "), label = "Select the analysis", selected = " ")
-           ),
-           
-           #_____TIME ANALYSIS__________________________________________________
-           conditionalPanel(
-             condition = "input.file_type_options != ' ' && input.linear_analysis_options == 'Time'",
-             
-             sliderInput("window_size_slider", label = "Chose the window size", min = 50, max = 600, step = 1, value = 300),
-             actionButton("Analyze_Time_Button", "Show Time Analysis"),
-             #shinyjs::disable("window_size_slider"),#This permits the button to not be able since a file is selected
-             #shinyjs::disable("Analyze_Time_Button"),
-             textOutput("info_time_analysis"),
-             plotOutput("plot_time_analysis"),
-             tableOutput("table_time_analysis"),
-             textOutput("info_time_analysis2"),
-             tableOutput("table_time_history")
-             
-           ),
-           
-           #_____FREQUENCY ANALYSIS_____________________________________________
-           conditionalPanel(
-             condition = "input.file_type_options != ' ' && input.linear_analysis_options == 'Frequency'",
-             sliderInput("freq_size_slider", label = "Chose the window size", min = 2, max = 24, step = 1, value = 4),
-             actionButton("Analyze_Freq_Button", "Show Frequency Analisis"),
-             #shinyjs::disable("Analyze_Freq_Button"), #This permits the button to not be able since a file is selected
-             textOutput("info_freq_analysis"),
-             plotOutput("plot_freq_analysis"),
-             tableOutput("table_freq_analysis"),
-             textOutput("info_freq_analysis2"),
-             tableOutput("table_freq_history"),
-             
-             
-           ),
-           
-           #_____WAVELETS ANALYSIS_____________________________________________
-           conditionalPanel(
-             condition = "input.file_type_options != ' ' && input.linear_analysis_options == 'Wavelets'",
-             actionButton("Analyze_Wave_Button", "Show Wavelets Analisis"),
-             #shinyjs::disable("Analyze_Wave_Button"), #This permits the button to not be able since a file is selected
-             textOutput("info_wave_analysis"),
-             plotOutput("plot_wave_analysis"),
-             tableOutput("table_wave_analysis"),
-             textOutput("info_wave_analysis2"),
-             tableOutput("table_wave_history")
-           )
-           
-    ),
-  
-  #__NON-LINEAR ANALYSIS______________________________________________________________
-  tabPanel("Non-Linear Analysis", 
-           h1("Do you want to perform a non-linear analysis?"),
-           selectInput(inputId = "non_linear_analysis_options", c("Saphiro", "Posthoc", "Statistical frequency analysis","Statistical time analysis", " "), label = "Select the analysis", selected = " "),
-           textOutput("non_linear_results")
+               conditionalPanel(
+                 condition = "input.file_type_options == 'Polar'",
+                 fileInput(inputId = "fileSelector",
+                           label = "Load Data",
+                           multiple = FALSE,
+                           placeholder = "No file selected",
+                           accept = ".polar",
+                           width = "100%")
+               ),
+               
+               conditionalPanel(
+                 condition = "input.file_type_options == 'RR'",
+                 fileInput(inputId = "fileSelector",
+                           label = "Load Data",
+                           multiple = FALSE,
+                           placeholder = "No file selected",
+                           accept = ".txt",
+                           width = "100%")
+               ),
+               
+               conditionalPanel(
+                 condition = "input.file_type_options == 'Suunto'",
+                 fileInput(inputId = "fileSelector",
+                           label = "Load Data",
+                           multiple = FALSE,
+                           placeholder = "No file selected",
+                           accept = ".txt",
+                           width = "100%")
+               ),
+               
+               conditionalPanel(
+                 condition = "input.file_type_options != ' '",
+                 selectInput(inputId = "linear_analysis_options", c("Time", "Frequency", "Wavelets", " "), label = "Select the analysis", selected = " ")
+               ),
+               
+               #_____TIME ANALYSIS__________________________________________________
+               conditionalPanel(
+                 condition = "input.file_type_options != ' ' && input.linear_analysis_options == 'Time'",
+                 
+                 sliderInput("window_size_slider", label = "Chose the window size", min = 50, max = 600, step = 1, value = 300),
+                 actionButton("Analyze_Time_Button", "Show Time Analysis"),
+                 #shinyjs::disable("window_size_slider"),#This permits the button to not be able since a file is selected
+                 #shinyjs::disable("Analyze_Time_Button"),
+                 textOutput("info_time_analysis"),
+                 plotOutput("plot_time_analysis"),
+                 tableOutput("table_time_analysis"),
+                 textOutput("info_time_analysis2"),
+                 tableOutput("table_time_history")
+                 
+               ),
+               
+               #_____FREQUENCY ANALYSIS_____________________________________________
+               conditionalPanel(
+                 condition = "input.file_type_options != ' ' && input.linear_analysis_options == 'Frequency'",
+                 sliderInput("freq_size_slider", label = "Chose the window size", min = 2, max = 24, step = 1, value = 4),
+                 actionButton("Analyze_Freq_Button", "Show Frequency Analisis"),
+                 #shinyjs::disable("Analyze_Freq_Button"), #This permits the button to not be able since a file is selected
+                 textOutput("info_freq_analysis"),
+                 plotOutput("plot_freq_analysis"),
+                 tableOutput("table_freq_analysis"),
+                 textOutput("info_freq_analysis2"),
+                 tableOutput("table_freq_history"),
+                 
+                 
+               ),
+               
+               #_____WAVELETS ANALYSIS_____________________________________________
+               conditionalPanel(
+                 condition = "input.file_type_options != ' ' && input.linear_analysis_options == 'Wavelets'",
+                 actionButton("Analyze_Wave_Button", "Show Wavelets Analisis"),
+                 #shinyjs::disable("Analyze_Wave_Button"), #This permits the button to not be able since a file is selected
+                 textOutput("info_wave_analysis"),
+                 plotOutput("plot_wave_analysis"),
+                 tableOutput("table_wave_analysis"),
+                 textOutput("info_wave_analysis2"),
+                 tableOutput("table_wave_history")
+               )
+               
+      ),
+      
+      #__NON-LINEAR ANALYSIS______________________________________________________________
+      tabPanel("Non-Linear Analysis",
+               h1("Do you want to perform a non-linear analysis?"),
+               selectInput(inputId = "non_linear_analysis_options", c("Saphiro", "Posthoc", "Statistical frequency analysis","Statistical time analysis", " "), label = "Select the analysis", selected = " "),
+               textOutput("non_linear_results")
+      )
+      
+    )
   )
- 
-  )
-)
-
-##SERVER########################################################################
-server <- function(input, output, session) {
-  #__LINEAR ANALYSIS____________________________________________________________
-  observeEvent(input$botonLinear, {
-    updateNavbarPage(session, "Heart Rate Variability", selected = "Linear Analysis")
-  })
   
-  #__MULTIPLE ANALYSIS__________________________________________________
-  output$samples <- renderUI({
-    num_samples <- input$num_samples
-    samples <- lapply(seq_len(num_samples), function(i) {
-      actionButton(inputId = paste0("folder", i), label = paste0("Select folder ", i))
+  ##SERVER########################################################################
+  server <- function(input, output, session) {
+    #__LINEAR ANALYSIS____________________________________________________________
+    observeEvent(input$botonLinear, {
+      updateNavbarPage(session, "Heart Rate Variability", selected = "Linear Analysis")
     })
-    do.call(tagList, samples)
-  })
-  
-  
-  # Initialize the path files list
-  file_paths <- reactiveVal(list())
-  #directory = list()
-  
-  # Observes each button and updates the path list
-  observe({
-    num_samples <- input$num_samples
-    # for (i in seq_len(num_samples)) {
-    for (i in num_samples) {
-      btn_id <- paste0("folder", i)
-      observeEvent(input[[btn_id]], {
-        path <- dirname(file.choose())
-        current_paths <- file_paths()
-        current_paths[[i]] <- path
-        file_paths(current_paths)
-        assign("directory", current_paths, envir = .GlobalEnv)
+    
+    #__MULTIPLE ANALYSIS__________________________________________________
+    observeEvent(input$go , {
+      output$samples <- renderUI({
+        num_samples <- input$num_samples
+        br()
+        samples <- lapply(seq_len(num_samples), function(i) {
+          br()
+          actionButton(inputId = paste0("folder", i), label = paste0("Select folder ", i))
+        })
+        do.call(tagList, samples)
       })
-    }
-    
-  })
-  
-
-  
-  observeEvent(input$RHRV, {
-    output$info_multiple_analysis <-renderPrint({
-      #cat(paste0(capture.output(RHRVEasy(file_paths))))
-      cat(paste0("Files have been uploaded and studied from ", directory))
-      RHRVEasy(directory)
     })
     
-  })
+    # Initialize the path files list
+    file_paths <- reactiveVal(list())
     
-
-  #__NON-LINEAR ANALYSIS_________________________________________________________
-  observeEvent(input$botonNonLinear, {
-    updateNavbarPage(session, "Heart Rate Variability", selected = "Non-Linear Analysis")
-  })
-  
-  data3 = data.frame()
-  
-  #__TIME ANALYSIS______________________________________________________________
-  observeEvent(input$Analyze_Time_Button, {
-        #data3 = data.frame()
+    
+    #directory = list()
+    
+    # Observes each button and updates the path list
+    observe({
+      num_samples <- input$num_samples
+      # for (i in seq_len(num_samples)) {
+      # directory = list()
+      for (i in num_samples) {
+        btn_id <- paste0("folder", i)
+        observeEvent(input[[btn_id]], {
+          #path <- dirname(file.choose())
+          path <- normalizePath(choose.dir(default = ".", caption = paste0("Select folder", i)))
+          #directory = c(directory, path)
+          
+          current_paths <- file_paths()
+          current_paths[[i]] <- path
+          file_paths(current_paths)
+          
+          toggleClass(btn_id, "boton-pulsado")
+          
+          output$info2 <- renderPrint({
+            #file_paths
+            #length(file_paths())
+            cat(paste0("Folder ", i , " has been uploaded"))
+          })
+        })
         
-        #This permits to enable the button when a file has been selected
-        if (!is.null(input$fileSelector)) {
-          shinyjs::enable("Analyze_Time_Button")
-          shinyjs::enable("window_size_slider")
-          hrv.data = preparing_analysis( input$fileSelector$name,"/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
-          data2 = time_analysis(format = "RR", file = input$fileSelector$name, size = input$window_size_slider, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
+      }
+      # directory <<- file_paths
+      # assign("directory", file_paths, envir = .GlobalEnv)
+      
+    })
+    
+    
+    
+    observeEvent(input$RHRV, {
+      output$info_multiple_analysis <-renderPrint({
+        #cat(paste0(capture.output(RHRVEasy(file_paths))))
+        paths <- file_paths()
+        cat(paste0("Files have been uploaded and studied from ", paths))
+        RHRVEasy(paths, input$significance_slider)
+      })
+      
+    })
+    
+    
+    #__NON-LINEAR ANALYSIS_________________________________________________________
+    observeEvent(input$botonNonLinear, {
+      updateNavbarPage(session, "Heart Rate Variability", selected = "Non-Linear Analysis")
+    })
+    
+    data3 = data.frame()
+    
+    #__TIME ANALYSIS______________________________________________________________
+    observeEvent(input$Analyze_Time_Button, {
+      #data3 = data.frame()
+      
+      #This permits to enable the button when a file has been selected
+      if (!is.null(input$fileSelector)) {
+        shinyjs::enable("Analyze_Time_Button")
+        shinyjs::enable("window_size_slider")
+        hrv.data = preparing_analysis( input$fileSelector$name,"/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
+        data2 = time_analysis(format = "RR", file = input$fileSelector$name, size = input$window_size_slider, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
         
         
         #Plot the file in the load data file
@@ -1336,7 +1372,7 @@ server <- function(input, output, session) {
           PlotNIHR(hrv.data)
           #PlotHR(hrv.data)
         })
-          
+        
         #Print the name of the file and its datapath
         output$info_time_analysis <-  renderPrint({
           cat(paste0("El archivo cargado es -> ",  input$fileSelector$name, " y su datapath es: ",input$fileSelector$datapath))
@@ -1355,92 +1391,92 @@ server <- function(input, output, session) {
           data3 = rbind(data3, data2)
           data3
         })
-        }
-  })
-  
-  
-  
-  #__FREQUENCY ANALYSIS______________________________________________________________
-  observeEvent(input$Analyze_Freq_Button, {
+      }
+    })
     
-    #This permits to enable the button when a file has been selected
-    if (!is.null(input$fileSelector)) {
-      shinyjs::enable("Analyze_Time_Button")
-      hrv.data = preparing_analysis( input$fileSelector$name,"/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
-      data2 = freq_analysis(format = "RR", file = input$fileSelector$name, freqhr = input$freq_size_slider , class = "linear", type = "fourier", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
+    
+    
+    #__FREQUENCY ANALYSIS______________________________________________________________
+    observeEvent(input$Analyze_Freq_Button, {
       
-    #Plot the file in the load data file
-    output$plot_freq_analysis <- renderPlot({
-      #PlotPowerBand(hrv.data2, indexFreqAnalysis = 1, ymax = 200, ymaxratio = 1.7)
-      data2 = freq_analysis(format = "RR", file = input$fileSelector$name, freqhr = input$freq_size_slider, class = "linear", type = "fourier", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
+      #This permits to enable the button when a file has been selected
+      if (!is.null(input$fileSelector)) {
+        shinyjs::enable("Analyze_Time_Button")
+        hrv.data = preparing_analysis( input$fileSelector$name,"/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
+        data2 = freq_analysis(format = "RR", file = input$fileSelector$name, freqhr = input$freq_size_slider , class = "linear", type = "fourier", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
+        
+        #Plot the file in the load data file
+        output$plot_freq_analysis <- renderPlot({
+          #PlotPowerBand(hrv.data2, indexFreqAnalysis = 1, ymax = 200, ymaxratio = 1.7)
+          data2 = freq_analysis(format = "RR", file = input$fileSelector$name, freqhr = input$freq_size_slider, class = "linear", type = "fourier", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
+          
+        })
+        
+        #Print the name of the file and its datapath
+        output$info_freq_analysis <-  renderPrint({
+          cat(paste0("El archivo cargado es -> ",  input$fileSelector$name, " y su datapath es: ",input$fileSelector$datapath))
+        })
+        
+        #Shows the table with the time analysis
+        output$table_freq_analysis <-  renderTable({
+          data2
+        })
+        
+        #Shows the time analysis historial
+        output$table_freq_history <-  renderTable({
+          output$info_freq_analysis2 <-  renderPrint({
+            cat(paste("History"))
+          })
+          data3 = rbind(data3, data2)
+          data3
+        })
+      }
+    })
+    
+    #__WAVELETS ANALYSIS______________________________________________________________
+    observeEvent(input$Analyze_Wave_Button, {
       
+      #This permits to enable the button when a file has been selected
+      if (!is.null(input$fileSelector)) {
+        shinyjs::enable("Analyze_Wave_Button")
+        hrv.data = preparing_analysis( input$fileSelector$name,"/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
+        data2 = wavelet_analysis(format = "RR", type = "wavelet", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
+      }
+      
+      #Plot the file in the load data file
+      output$plot_wave_analysis <- renderPlot({
+        data2 = wavelet_analysis(format = "RR", type = "wavelet", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
       })
-    
-    #Print the name of the file and its datapath
-    output$info_freq_analysis <-  renderPrint({
-      cat(paste0("El archivo cargado es -> ",  input$fileSelector$name, " y su datapath es: ",input$fileSelector$datapath))
-    })
-    
-    #Shows the table with the time analysis
-    output$table_freq_analysis <-  renderTable({
-      data2
-    })
-    
-    #Shows the time analysis historial
-    output$table_freq_history <-  renderTable({
-      output$info_freq_analysis2 <-  renderPrint({
-       cat(paste("History"))
+      
+      #Print the name of the file and its datapath
+      output$info_wave_analysis <-  renderPrint({
+        cat(paste0("El archivo cargado es -> ",  input$fileSelector$name, " y su datapath es: ",input$fileSelector$datapath))
       })
-      data3 = rbind(data3, data2)
-      data3
-    })
-    }
-  })
-  
-  #__WAVELETS ANALYSIS______________________________________________________________
-  observeEvent(input$Analyze_Wave_Button, {
-    
-    #This permits to enable the button when a file has been selected
-    if (!is.null(input$fileSelector)) {
-      shinyjs::enable("Analyze_Wave_Button")
-      hrv.data = preparing_analysis( input$fileSelector$name,"/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
-      data2 = wavelet_analysis(format = "RR", type = "wavelet", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
-    }
-    
-    #Plot the file in the load data file
-    output$plot_wave_analysis <- renderPlot({
-      data2 = wavelet_analysis(format = "RR", type = "wavelet", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
-    })
-    
-    #Print the name of the file and its datapath
-    output$info_wave_analysis <-  renderPrint({
-      cat(paste0("El archivo cargado es -> ",  input$fileSelector$name, " y su datapath es: ",input$fileSelector$datapath))
-    })
-    
-    #Shows the table with the time analysis
-    output$table_wave_analysis <-  renderTable({
-      data2
-    })
-    
-    #Shows the time analysis historial
-    output$table_wave_history <-  renderTable({
-      output$info_wave_analysis2 <-  renderPrint({
-        cat(paste0("History"))
+      
+      #Shows the table with the time analysis
+      output$table_wave_analysis <-  renderTable({
+        data2
       })
-      data3 = rbind(data3, data2)
-      data3
+      
+      #Shows the time analysis historial
+      output$table_wave_history <-  renderTable({
+        output$info_wave_analysis2 <-  renderPrint({
+          cat(paste0("History"))
+        })
+        data3 = rbind(data3, data2)
+        data3
+      })
+      
     })
     
-  })
+    #This is just an example using the inputs with numbers
+    observeEvent(input$sumar , {
+      resultado <- input$primer_numero + input$segundo_numero
+      output$resultado <- renderText(resultado)
+    })
+    
+  }
   
-  #This is just an example using the inputs with numbers
-  observeEvent(input$sumar , {
-    resultado <- input$primer_numero + input$segundo_numero
-    output$resultado <- renderText(resultado)
-  })
+  shinyApp(ui = ui, server = server)
   
-}
-
-shinyApp(ui = ui, server = server)
-
 }
