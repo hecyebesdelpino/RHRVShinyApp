@@ -1,3 +1,4 @@
+
 {
   library(RHRV)
   # Post hoc Dunn test
@@ -60,14 +61,15 @@
     for (file in files) {
       hrv.data = preparing_analysis(format, file = file, rrs = rrs2)
       hrv.data = easy_call(hrv.data, CreateTimeAnalysis, ...)
-      results = hrv.data$TimeAnalysis[]
+      results=hrv.data$TimeAnalysis[]
       name_file = list ("filename" = file)
       group = list ("group" = class)
       # group_name = list("group" = group)
       row_list = c (name_file, results, group)
-      df = as.data.frame(row_list)
-      dataFrame = rbind(dataFrame, df)
+      df=as.data.frame(row_list)
+      dataFrame=rbind(dataFrame, df)
     }
+    #@todo  ?Remove size column???
     dataFrame
   }
   
@@ -123,6 +125,7 @@
       group = list ("group" = class)
       row_list = c (name_file, x1, group)
       dataFrameMWavelet = rbind(dataFrameMWavelet, as.data.frame(row_list))
+      
     }
     dataFrameMWavelet
   }
@@ -499,7 +502,7 @@
         shapiro.test(x)$p.value
       },
       error=function(cond) {
-        message("Problem in SHAPIRO!!!!!")
+        message("Problema en SHAPIROOOO!!!!!")
         message(x)
         if(verb){
           message("All indice's values identical in shapiro.test, or less than three values are different from NA; non normality assumed and pvalue set to 0")
@@ -800,11 +803,11 @@
               results$pValues[[column]], "\n")
           
           # for (i in 1:length(listDF)){
-          #  group = levels(results$TimeAnalysis$group)[i]
-          #  cat(column, " for the group", levels(results$TimeAnalysis$group)[i], "is",
-          #     mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
-          #      sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
-          #}
+          #   group = levels(results$TimeAnalysis$group)[i]
+          #   cat(column, " for the group", levels(results$TimeAnalysis$group)[i], "is",
+          #       mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
+          #       sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
+          # }
         }
       }
       #report anova
@@ -815,11 +818,11 @@
               results$pValues[[column]], "\n")
           
           # for (i in 1:length(listDF)){
-          #    group = levels(results$TimeAnalysis$group)[i]
-          #    cat(column, " for the group ", levels(results$TimeAnalysis$group)[i], "is",
-          #        mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
-          #        sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
-          #  }
+          #   group = levels(results$TimeAnalysis$group)[i]
+          #   cat(column, " for the group ", levels(results$TimeAnalysis$group)[i], "is",
+          #       mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
+          #       sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
+          # }
           
         }
       }
@@ -851,12 +854,12 @@
           cat("\nThere is a statistically significant difference in", column,  "; pvalue: ",
               results$pValues[[column]], "\n")
           
-          #   for (i in 1:length(listDF)){
-          #      group = levels(results$TimeAnalysis$group)[i]
-          #      cat(column, " for the group", levels(results$TimeAnalysis$group)[i], "is",
-          #          mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
-          #          sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
-          #   }
+          # for (i in 1:length(listDF)){
+          #   group = levels(results$TimeAnalysis$group)[i]
+          #   cat(column, " for the group", levels(results$TimeAnalysis$group)[i], "is",
+          #       mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
+          #       sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
+          # }
         }
       }
       #report anova
@@ -866,12 +869,12 @@
           cat("\nThere is a statistically significant difference in", column, "; pvalue: ",
               results$pValues[[column]], "\n")
           
-          #    for (i in 1:length(listDF)){
-          #      group = levels(results$TimeAnalysis$group)[i]
-          #      cat(column, " for the group ", levels(results$TimeAnalysis$group)[i], "is",
-          #          mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
-          #          sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
-          #    }
+          # for (i in 1:length(listDF)){
+          #   group = levels(results$TimeAnalysis$group)[i]
+          #   cat(column, " for the group ", levels(results$TimeAnalysis$group)[i], "is",
+          #       mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
+          #       sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
+          # }
           
         }
       }
@@ -920,12 +923,12 @@
             cat("\nThere is a statistically significant difference in", column,
                 "; pvalue: ", results$pValues[[column]], "\n")
             
-            #    for (i in 1:length(listDF)){
-            #      group = levels(results$TimeAnalysis$group)[i]
-            #      cat(column, " for the group", levels(results$TimeAnalysis$group)[i], "is",
-            #          mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
-            #          sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
-            #    }
+            # for (i in 1:length(listDF)){
+            #   group = levels(results$TimeAnalysis$group)[i]
+            #   cat(column, " for the group", levels(results$TimeAnalysis$group)[i], "is",
+            #       mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
+            #       sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
+            # }
           }
         }
         #report anova
@@ -935,12 +938,12 @@
             cat("\nThere is a statistically significant difference in", column,
                 "; pvalue: ", results$pValues[[column]], "\n")
             
-            #      for (i in 1:length(listDF)){
-            #        group = levels(results$TimeAnalysis$group)[i]
-            #        cat(column, " for the group ", levels(results$TimeAnalysis$group)[i], "is",
-            #            mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
-            #            sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
-            #      }
+            # for (i in 1:length(listDF)){
+            #   group = levels(results$TimeAnalysis$group)[i]
+            #   cat(column, " for the group ", levels(results$TimeAnalysis$group)[i], "is",
+            #       mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
+            #       sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
+            # }
             
           }
         }
@@ -1095,6 +1098,7 @@
     results
     
   }
+  
 }
 
 
@@ -1105,25 +1109,22 @@
   library(shinyjs)
   
   ##USER##########################################################################
-  
   ui <- fluidPage(
     
+    #Changes the button style. Will apply when the button has been selected it would change color
     tags$head(
-      # tags$style(HTML("
-      #     .boton-pulsado {
-      #      background-color: green;
-      #      color: white;
-      #      }"
-      
       tags$style(HTML("
       .boton-pulsado {
         background-color: green !important;
         color: white !important;
       }"
-                      
-      )),),
+      )),
+    ),
+    
+    
     
     tabsetPanel(
+      
       #__HOME_______________________________________________________________________
       tabPanel(
         title = "Heart Rate Variability",
@@ -1134,6 +1135,8 @@
         p("If you have any problem, please contact us")
       ),
       
+      
+      
       #__MULTIPLE FILES_____________________________________________________________
       tabPanel("Multiple Files Analysis",
                sidebarLayout(
@@ -1141,157 +1144,91 @@
                    numericInput(inputId = "num_samples", label = "Number of samples", value = 1, min = 1),
                    actionButton("go", "START"),
                    uiOutput(outputId = "samples"),
-                   uiOutput("samples2"),
-                   textOutput("info2")
+                   textOutput("info2"),
                  ),
                  
                  mainPanel(
                    textOutput("info"),
-                   
-                   
                    conditionalPanel(
-                     # condition = !is.null(input[[paste0("file", input$num_samples)]]),
                      condition = ("input.go > 0"),
-                     #condition = "input.num_samples > 0",
-                     p(" "),
-                     sliderInput("significance_slider", "Significance level", min = 0.001, max = 0.99, step = 0.001, value = 0.05),
-                     p(" "),
-                     actionButton("RHRV", "RHRV study")
+                     br(),
+                     numericInput("significance_value", "Significance level", value = 0.05),
+                     br(),
+                     actionButton("RHRV", "RHRV study"),
                    ),
-                   
                    
                    conditionalPanel(
                      condition = "input.RHRV > 0",
                      p("Calculating.... Please wait, it could take some minutes"),
-                     #p(folder_paths)
+                     tableOutput("table_RHRV_analysis")
                    ),
                    
                    textOutput("info_multiple_analysis")
-                   # tableOutput("table_multi_analysis")
                  )
                )
-               
       ),
       
+      
+      
+      
       #__LINEAR ANALYSIS____________________________________________________________
-      tabPanel("Linear Analysis",
-               selectInput(inputId = "file_type_options", c("Ascii", "RR", "Polar", "Suunto", "EDFPlus", "Ambit", " "), label = "Select the file type", selected = " "),
+      tabPanel("Single File Analysis",
+               selectInput(inputId = "linear_analysis_options", c("Time analysis", "Fourier analysis", "Wavelets analysis"), label = "Select the analysis", selected = " "),
+               selectInput(inputId = "type_of_file", c( "RR","Ascii", "Polar", "Suunto", "EDFPlus", "Ambit"), label = "Select the type of dile", selected = NULL),
                
-               conditionalPanel(
-                 condition = "input.file_type_options == 'Ascii'",
-                 fileInput(inputId = "fileSelector",
-                           label = "Load Data",
-                           multiple = FALSE,
-                           placeholder = "No file selected",
-                           accept = ".txt",
-                           width = "100%"
-                 )
-               ),
                
-               conditionalPanel(
-                 condition = "input.file_type_options == 'Polar'",
-                 fileInput(inputId = "fileSelector",
-                           label = "Load Data",
-                           multiple = FALSE,
-                           placeholder = "No file selected",
-                           accept = ".polar",
-                           width = "100%")
-               ),
-               
-               conditionalPanel(
-                 condition = "input.file_type_options == 'RR'",
-                 fileInput(inputId = "fileSelector",
-                           label = "Load Data",
-                           multiple = FALSE,
-                           placeholder = "No file selected",
-                           accept = ".txt",
-                           width = "100%")
-               ),
-               
-               conditionalPanel(
-                 condition = "input.file_type_options == 'Suunto'",
-                 fileInput(inputId = "fileSelector",
-                           label = "Load Data",
-                           multiple = FALSE,
-                           placeholder = "No file selected",
-                           accept = ".txt",
-                           width = "100%")
-               ),
-               
-               conditionalPanel(
-                 condition = "input.file_type_options != ' '",
-                 selectInput(inputId = "linear_analysis_options", c("Time", "Frequency", "Wavelets", " "), label = "Select the analysis", selected = " ")
-               ),
                
                #_____TIME ANALYSIS__________________________________________________
                conditionalPanel(
-                 condition = "input.file_type_options != ' ' && input.linear_analysis_options == 'Time'",
-                 
+                 condition = "input.linear_analysis_options == 'Time analysis'",
                  sliderInput("window_size_slider", label = "Chose the window size", min = 50, max = 600, step = 1, value = 300),
-                 actionButton("Analyze_Time_Button", "Show Time Analysis"),
-                 #shinyjs::disable("window_size_slider"),#This permits the button to not be able since a file is selected
-                 #shinyjs::disable("Analyze_Time_Button"),
+                 actionButton("Analyze_Time_Button", "Start"),
                  textOutput("info_time_analysis"),
                  plotOutput("plot_time_analysis"),
                  tableOutput("table_time_analysis"),
-                 textOutput("info_time_analysis2"),
-                 tableOutput("table_time_history")
-                 
                ),
                
                #_____FREQUENCY ANALYSIS_____________________________________________
                conditionalPanel(
-                 condition = "input.file_type_options != ' ' && input.linear_analysis_options == 'Frequency'",
+                 condition = "input.linear_analysis_options == 'Fourier analysis'",
                  sliderInput("freq_size_slider", label = "Chose the window size", min = 2, max = 24, step = 1, value = 4),
-                 actionButton("Analyze_Freq_Button", "Show Frequency Analisis"),
-                 #shinyjs::disable("Analyze_Freq_Button"), #This permits the button to not be able since a file is selected
+                 actionButton("Analyze_Fourier_Button", "Start"),
                  textOutput("info_freq_analysis"),
                  plotOutput("plot_freq_analysis"),
                  tableOutput("table_freq_analysis"),
-                 textOutput("info_freq_analysis2"),
-                 tableOutput("table_freq_history"),
-                 
-                 
                ),
                
                #_____WAVELETS ANALYSIS_____________________________________________
                conditionalPanel(
-                 condition = "input.file_type_options != ' ' && input.linear_analysis_options == 'Wavelets'",
-                 actionButton("Analyze_Wave_Button", "Show Wavelets Analisis"),
-                 #shinyjs::disable("Analyze_Wave_Button"), #This permits the button to not be able since a file is selected
+                 condition = "input.linear_analysis_options == 'Wavelets analysis'",
+                 actionButton("Analyze_Wave_Button", "Start"),
                  textOutput("info_wave_analysis"),
                  plotOutput("plot_wave_analysis"),
                  tableOutput("table_wave_analysis"),
-                 textOutput("info_wave_analysis2"),
-                 tableOutput("table_wave_history")
                )
                
       ),
       
-      #__NON-LINEAR ANALYSIS______________________________________________________________
-      tabPanel("Non-Linear Analysis",
-               h1("Do you want to perform a non-linear analysis?"),
-               selectInput(inputId = "non_linear_analysis_options", c("Saphiro", "Posthoc", "Statistical frequency analysis","Statistical time analysis", " "), label = "Select the analysis", selected = " "),
-               textOutput("non_linear_results")
-      )
+      # #__NON-LINEAR ANALYSIS______________________________________________________________
+      # tabPanel("Non-Linear Analysis",
+      #          h1("Do you want to perform a non-linear analysis?"),
+      #          selectInput(inputId = "non_linear_analysis_options", c("Saphiro", "Posthoc", "Statistical frequency analysis","Statistical time analysis", " "), label = "Select the analysis", selected = " "),
+      #          textOutput("non_linear_results")
+      # )
       
     )
   )
   
   ##SERVER########################################################################
   server <- function(input, output, session) {
-    #__LINEAR ANALYSIS____________________________________________________________
-    observeEvent(input$botonLinear, {
-      updateNavbarPage(session, "Heart Rate Variability", selected = "Linear Analysis")
-    })
     
     #__MULTIPLE ANALYSIS__________________________________________________
+    #Creates buttons for the folder selection
     observeEvent(input$go , {
       output$samples <- renderUI({
         num_samples <- input$num_samples
         br()
         samples <- lapply(seq_len(num_samples), function(i) {
-          br()
           actionButton(inputId = paste0("folder", i), label = paste0("Select folder ", i))
         })
         do.call(tagList, samples)
@@ -1302,177 +1239,95 @@
     file_paths <- reactiveVal(list())
     
     
-    #directory = list()
-    
     # Observes each button and updates the path list
     observe({
       num_samples <- input$num_samples
-      # for (i in seq_len(num_samples)) {
-      # directory = list()
       for (i in num_samples) {
         btn_id <- paste0("folder", i)
+        txt_id <- paste0("folder_text", i)
         observeEvent(input[[btn_id]], {
-          #path <- dirname(file.choose())
           path <- normalizePath(choose.dir(default = ".", caption = paste0("Select folder", i)))
-          #directory = c(directory, path)
-          
           current_paths <- file_paths()
           current_paths[[i]] <- path
           file_paths(current_paths)
-          
           toggleClass(btn_id, "boton-pulsado")
-          
-          output$info2 <- renderPrint({
-            #file_paths
-            #length(file_paths())
-            cat(paste0("Folder ", i , " has been uploaded"))
-          })
+          output$info2 <- renderPrint({cat(paste0(file_paths() , " has been uploaded"))})
         })
-        
       }
-      # directory <<- file_paths
-      # assign("directory", file_paths, envir = .GlobalEnv)
-      
     })
-    
     
     
     observeEvent(input$RHRV, {
       output$info_multiple_analysis <-renderPrint({
-        #cat(paste0(capture.output(RHRVEasy(file_paths))))
-        paths <- file_paths()
-        cat(paste0("Files have been uploaded and studied from ", paths))
-        RHRVEasy(paths, input$significance_slider)
+        resultados <- RHRVEasy(file_paths(), input$significance_value)
+        resultados <- capture.output(resultados)
+        assign("Resultados", resultados, envir = .GlobalEnv)
+        # resultados[resultados != ""]
+        
       })
       
-    })
-    
-    
-    #__NON-LINEAR ANALYSIS_________________________________________________________
-    observeEvent(input$botonNonLinear, {
-      updateNavbarPage(session, "Heart Rate Variability", selected = "Non-Linear Analysis")
-    })
-    
-    data3 = data.frame()
-    
-    #__TIME ANALYSIS______________________________________________________________
-    observeEvent(input$Analyze_Time_Button, {
-      #data3 = data.frame()
+      output$table_RHRV_analysis <- renderTable(
+        # resultados <- RHRVEasy(file_paths(), input$significance_value),
+        # #assign("Resultados", resultados, envir = .GlobalEnv)
+        # resultados <- capture.output(resultados),
+        Resultados[Resultados != ""]
+      )
       
-      #This permits to enable the button when a file has been selected
-      if (!is.null(input$fileSelector)) {
-        shinyjs::enable("Analyze_Time_Button")
-        shinyjs::enable("window_size_slider")
-        hrv.data = preparing_analysis( input$fileSelector$name,"/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
-        data2 = time_analysis(format = "RR", file = input$fileSelector$name, size = input$window_size_slider, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
-        
-        
-        #Plot the file in the load data file
-        output$plot_time_analysis <- renderPlot({
-          PlotNIHR(hrv.data)
-          #PlotHR(hrv.data)
-        })
-        
-        #Print the name of the file and its datapath
-        output$info_time_analysis <-  renderPrint({
-          cat(paste0("El archivo cargado es -> ",  input$fileSelector$name, " y su datapath es: ",input$fileSelector$datapath))
-        })
-        
-        #Shows the table with the time analysis
-        output$table_time_analysis <-  renderTable({
-          data2
-        })
-        
-        #Shows the time analysis historial
-        output$table_time_history <-  renderTable({
-          output$info_time_analysis2 <-  renderPrint({
-            cat(paste0("History"))
-          })
-          data3 = rbind(data3, data2)
-          data3
-        })
-      }
+    })
+    
+    
+    
+    #__SINGLE_FILE_ANALYSIS_____________________________________________________
+    #__TIME ANALYSIS____________________________________________________________
+    observeEvent(input$Analyze_Time_Button, {
+      file <- choose.files(caption = "Select the file")
+      hrv.data = preparing_analysis(file = basename(file), rrs =  dirname(file), format = input$type_of_file)
+      file_data = time_analysis(format = input$type_of_file , file = basename(file), size = input$window_size_slider, class = "linear", rrs2 = dirname(file))
+      
+      #Plot the file in the load data file
+      output$plot_time_analysis <- renderPlot({ PlotNIHR(hrv.data)  })
+      
+      #Print the name of the file
+      output$info_time_analysis <-  renderPrint({ cat(paste0("The file ",  basename(file), " has been uploaded"))  })
+      
+      #Shows the table with the time analysis
+      output$table_time_analysis <-  renderTable({file_data})
     })
     
     
     
     #__FREQUENCY ANALYSIS______________________________________________________________
-    observeEvent(input$Analyze_Freq_Button, {
+    observeEvent(input$Analyze_Fourier_Button, {
+      file <- choose.files(caption = "Select the file")
+      hrv.data = preparing_analysis(basename(file), dirname(file), input$type_of_file)
+      file_data = freq_analysis(format = input$type_of_file, file = basename(file), size = input$window_size_slider, class = "linear", rrs2 = dirname(file), freqhr = input$freq_size_slider, type = "fourier")
       
-      #This permits to enable the button when a file has been selected
-      if (!is.null(input$fileSelector)) {
-        shinyjs::enable("Analyze_Time_Button")
-        hrv.data = preparing_analysis( input$fileSelector$name,"/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
-        data2 = freq_analysis(format = "RR", file = input$fileSelector$name, freqhr = input$freq_size_slider , class = "linear", type = "fourier", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
-        
-        #Plot the file in the load data file
-        output$plot_freq_analysis <- renderPlot({
-          #PlotPowerBand(hrv.data2, indexFreqAnalysis = 1, ymax = 200, ymaxratio = 1.7)
-          data2 = freq_analysis(format = "RR", file = input$fileSelector$name, freqhr = input$freq_size_slider, class = "linear", type = "fourier", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
-          
-        })
-        
-        #Print the name of the file and its datapath
-        output$info_freq_analysis <-  renderPrint({
-          cat(paste0("El archivo cargado es -> ",  input$fileSelector$name, " y su datapath es: ",input$fileSelector$datapath))
-        })
-        
-        #Shows the table with the time analysis
-        output$table_freq_analysis <-  renderTable({
-          data2
-        })
-        
-        #Shows the time analysis historial
-        output$table_freq_history <-  renderTable({
-          output$info_freq_analysis2 <-  renderPrint({
-            cat(paste("History"))
-          })
-          data3 = rbind(data3, data2)
-          data3
-        })
-      }
+      #Plot the file in the load data file
+      output$plot_freq_analysis <- renderPlot({PlotNIHR(hrv.data) })
+      
+      #Print the name of the file and its datapath
+      output$info_freq_analysis <-  renderPrint({cat(paste0("The file ",  basename(file), " has been uploaded"))})
+      
+      #Shows the table with the time analysis
+      output$table_freq_analysis <-  renderTable({ file_data})
     })
+    
+    
     
     #__WAVELETS ANALYSIS______________________________________________________________
     observeEvent(input$Analyze_Wave_Button, {
-      
-      #This permits to enable the button when a file has been selected
-      if (!is.null(input$fileSelector)) {
-        shinyjs::enable("Analyze_Wave_Button")
-        hrv.data = preparing_analysis( input$fileSelector$name,"/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/", "RR")
-        data2 = wavelet_analysis(format = "RR", type = "wavelet", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
-      }
+      file <- choose.files(caption = "Select the file")
+      hrv.data = preparing_analysis(basename(file), dirname(file), input$type_of_file)
+      file_data = freq_analysis(format = input$type_of_file, file = basename(file), size = input$window_size_slider, class = "linear", rrs2 = dirname(file), type = "wavelet")
       
       #Plot the file in the load data file
-      output$plot_wave_analysis <- renderPlot({
-        data2 = wavelet_analysis(format = "RR", type = "wavelet", file = input$fileSelector$name, class = "linear", rrs = '/Users/hecyebesdelpino/Desktop/TFG/NormalEnTXT/')
-      })
+      output$plot_wave_analysis <- renderPlot({PlotNIHR(hrv.data) })
       
       #Print the name of the file and its datapath
-      output$info_wave_analysis <-  renderPrint({
-        cat(paste0("El archivo cargado es -> ",  input$fileSelector$name, " y su datapath es: ",input$fileSelector$datapath))
-      })
+      output$info_wave_analysis <-  renderPrint({ cat(paste0("The file ",  basename(file), " has been uploaded")) })
       
       #Shows the table with the time analysis
-      output$table_wave_analysis <-  renderTable({
-        data2
-      })
-      
-      #Shows the time analysis historial
-      output$table_wave_history <-  renderTable({
-        output$info_wave_analysis2 <-  renderPrint({
-          cat(paste0("History"))
-        })
-        data3 = rbind(data3, data2)
-        data3
-      })
-      
-    })
-    
-    #This is just an example using the inputs with numbers
-    observeEvent(input$sumar , {
-      resultado <- input$primer_numero + input$segundo_numero
-      output$resultado <- renderText(resultado)
+      output$table_wave_analysis <-  renderTable({ file_data  })
     })
     
   }
