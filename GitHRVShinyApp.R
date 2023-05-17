@@ -1,4 +1,3 @@
-
 {
   library(RHRV)
   # Post hoc Dunn test
@@ -1107,6 +1106,7 @@
   library(shiny)
   library(RHRV)
   library(shinyjs)
+  library(shinyBS)
   
   ##USER##########################################################################
   ui <- fluidPage(
@@ -1142,10 +1142,14 @@
                sidebarLayout(
                  sidebarPanel(
                    numericInput(inputId = "num_samples", label = "Number of samples", value = 1, min = 1),
-                   actionButton("go", "START"),
+                   actionButton("go", "Upload folders"),
                    uiOutput(outputId = "samples"),
                    textOutput("info2"),
+                   br(),
+                   actionButton("RHRV", "RHRV study"),
                  ),
+                 
+                 
                  
                  mainPanel(
                    textOutput("info"),
@@ -1154,7 +1158,63 @@
                      br(),
                      numericInput("significance_value", "Significance level", value = 0.05),
                      br(),
-                     actionButton("RHRV", "RHRV study"),
+                     
+                     h3("Correction method"),
+                     selectInput(inputId = "correction_method_selection", choices = c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"), selected = "bonferroni",  label =  "Please select the correction method"),
+                     
+                     p("When the analysis finishes, do you want to save a copy of the indexes?"),
+                     actionButton("save_yes", "Yes"),
+                     actionButton("save_no", "No"),
+                     #selectInput(inputId = "save_HRV_indexes", choices = c("Yes", "No"), selected = "No", label = "Want a copy of the analysis"),
+                     textOutput("save"),
+                     br(),
+                     
+                     h3("Time analysis configuration"),
+                     numericInput("window_size_button", "Window size (Value from 1 to 1000)", value = 300, min = 1, max = 1000),
+                     bsTooltip("window_size_button", "The size of the window employed in time analysis. Default: 300 miliseconds", placement = "right"),
+                     #LIMITAMOS MINIMO Y MAXIMO??? ENTRE 1 y 10??
+                     numericInput("interval_size_button", "Interval", value = 7.8125),
+                     bsTooltip("interval_size_button", "Bin width of the histogram. Default 7.8125", placement = "right"),
+                     br(),
+                     
+                     h3("Frequency analysis configuration"),
+                     numericInput("freqhr_button", "Frecuency size", value = 4, min = 1, max = 10),
+                     bsTooltip("freqhr_button", "Frequency interpolation value. Default: 4 Hz", placement = "right"),
+                     selectInput(inputId = "frequency_method_selection", c("linear", "spline"), label = "Select the interpolation method", selected = "spline"),
+                     selectInput(inputId = "frequency_type_selection", c("fourier", "wavelet"), label = "Select the frequency type analysis", selected = "fourier"),
+                     actionButton("more_freq_options", "More options"),
+                     br(),
+                     
+                     
+                     # actionButton("RHRV", "RHRV study"),
+                     # br(),
+                   ),
+                   
+                   
+                   conditionalPanel(
+                     condition = "input.more_freq_options > 0 && input.frequency_type_selection == 'fourier'",
+                     br(),
+                     selectInput(inputId = "fourier_method_selection", choices = c("ar", "lomb", "pgram"), label = "Select the fourier method", selected = "lomb"),
+                     numericInput("ULFmin", "ULFmin", value = 0),
+                     
+                     numericInput("ULFmax", "ULFmax", value = 0.03),
+                     numericInput("VLFmin", "VLFmin", value = 0.03),
+                     
+                     numericInput("VLFmax", "VLFmax", value = 0.05),
+                     numericInput("LFmin", "LFmin", value = 0.05),
+                     
+                     numericInput("LFmax", "LFmax", value = 0.15),
+                     numericInput("HFmin", "HFmin", value = 0.15),
+                     numericInput("HFmax", "HFmax", value = 0.4)
+                   ),
+                   
+                   conditionalPanel(
+                     condition = "input.more_freq_options > 0 && input.frequency_type_selection == 'wavelet'",
+                     br(),
+                     selectInput(inputId = "wavelet_method_selection", choices = c("la8","la16","la20","d4","d6","d8","d16","bl14","bl20","fk4","fk6","fk8","fk14","fk22","mb4","mb8","mb16","mb24", "bs3.1"), label = "Select the wavelet type", selected = "d4"),
+                     #MIN Y MAXIMO???
+                     numericInput("band_tolerance_button", "Band tolerance", value = 0.1, min = 0.001),
+                     bsTooltip("band_tolerance_button", "Maximum acceptable error in the estimation of spectral bands", placement = "right")
                    ),
                    
                    conditionalPanel(
@@ -1237,6 +1297,7 @@
     
     # Initialize the path files list
     file_paths <- reactiveVal(list())
+    save_path <- reactiveVal
     
     
     # Observes each button and updates the path list
@@ -1256,6 +1317,25 @@
       }
     })
     
+    observeEvent(input$save_yes, {
+      save_path <- normalizePath(choose.dir(caption = "Select the location where the results are going to be saved"))
+      output$save <- renderPrint({cat(paste0("Results will be available in: ", save_path))})
+    })
+    
+    observeEvent(input$save_no, {
+      output$save <- renderPrint(cat("No copy will be done"))
+    })
+    
+    
+    # # observe(input$save_HRV_indexes == Yes,{
+    #    observe(input$save_HRV_indexes == Yes,{
+    #      if ('input$save_HRV_indexes == Yes'){
+    #      save_path <- normalizePath(choose.dir(caption = "Select the location where the results are going to be saved"))
+    #      output$save <- renderPrint({cat(paste0("Results will be available in: ", save_path))})
+    #      }else{
+    #        output$save <- renderPrint(cat("No path specified"))
+    #    }
+    #  })
     
     observeEvent(input$RHRV, {
       output$info_multiple_analysis <-renderPrint({
