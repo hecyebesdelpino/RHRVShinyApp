@@ -1,4 +1,5 @@
 {
+  
   library(RHRV)
   # Post hoc Dunn test
   library(dunn.test)
@@ -1118,186 +1119,241 @@
         background-color: green !important;
         color: white !important;
       }"
-      )),
-    ),
+      ))),
+    
+    tags$head(
+      tags$style(HTML("
+      .blue-button {
+        background-color: blue;
+        color: white;
+      }"
+      ))),
+    
+    tags$head(
+      tags$style(HTML("
+      .left-btn {
+        float: left;
+      }
+     
+      .right-btn {
+        float: right;
+      }
+    "))),
     
     
     
-    tabsetPanel(
-      
-      #__HOME_______________________________________________________________________
-      tabPanel(
-        title = "Heart Rate Variability",
-        h1("Welcome to the HRV App"),
-        p("This app will allow you to obtain some graphical and statistical studies of your HRV samples"),
-        p("Just go through the different tabs and try them all"),
-        p("This app reads Ascii, RR, Ambit, Suunto and EDFPlus files"),
-        p("If you have any problem, please contact us")
-      ),
-      
-      
-      
-      #__MULTIPLE FILES_____________________________________________________________
-      tabPanel("Multiple Files Analysis",
-               sidebarLayout(
-                 sidebarPanel(
-                   numericInput(inputId = "num_samples", label = "Number of samples", value = 1, min = 1),
-                   actionButton("go", "Upload folders"),
-                   uiOutput(outputId = "samples"),
-                   textOutput("info2"),
-                   br(),
-                   actionButton("RHRV", "RHRV study"),
+    tabsetPanel( id = "tabset",
+                 
+                 #__HOME_______________________________________________________________________
+                 tabPanel(
+                   title = "Heart Rate Variability",
+                   h1("Welcome to the HRV App"),
+                   p("This app will allow you to obtain some graphical and statistical studies of your HRV samples"),
+                   p("Just go through the different tabs and try them all"),
+                   p("This app reads Ascii, RR, Ambit, Suunto and EDFPlus files"),
+                   p("If you have any problem, please contact us")
                  ),
                  
                  
                  
-                 mainPanel(
-                   textOutput("info"),
-                   conditionalPanel(
-                     condition = ("input.go > 0"),
-                     br(),
-                     numericInput("significance_value", "Significance level", value = 0.05),
-                     br(),
-                     
-                     h3("Correction method"),
-                     selectInput(inputId = "correction_method_selection", choices = c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"), selected = "bonferroni",  label =  "Please select the correction method"),
-                     
-                     p("When the analysis finishes, do you want to save a copy of the indexes?"),
-                     actionButton("save_yes", "Yes"),
-                     actionButton("save_no", "No"),
-                     #selectInput(inputId = "save_HRV_indexes", choices = c("Yes", "No"), selected = "No", label = "Want a copy of the analysis"),
-                     textOutput("save"),
-                     br(),
-                     
-                     h3("Time analysis configuration"),
-                     numericInput("window_size_button", "Window size (Value from 1 to 1000)", value = 300, min = 1, max = 1000),
-                     bsTooltip("window_size_button", "The size of the window employed in time analysis. Default: 300 miliseconds", placement = "right"),
-                     #LIMITAMOS MINIMO Y MAXIMO??? ENTRE 1 y 10??
-                     numericInput("interval_size_button", "Interval", value = 7.8125),
-                     bsTooltip("interval_size_button", "Bin width of the histogram. Default 7.8125", placement = "right"),
-                     br(),
-                     
-                     h3("Frequency analysis configuration"),
-                     numericInput("freqhr_button", "Frecuency size", value = 4, min = 1, max = 10),
-                     bsTooltip("freqhr_button", "Frequency interpolation value. Default: 4 Hz", placement = "right"),
-                     selectInput(inputId = "frequency_method_selection", c("linear", "spline"), label = "Select the interpolation method", selected = "spline"),
-                     selectInput(inputId = "frequency_type_selection", c("fourier", "wavelet"), label = "Select the frequency type analysis", selected = "fourier"),
-                     actionButton("more_freq_options", "More options"),
-                     br(),
-                     
-                     
-                     # actionButton("RHRV", "RHRV study"),
-                     # br(),
-                   ),
-                   
-                   
-                   conditionalPanel(
-                     condition = "input.more_freq_options > 0 && input.frequency_type_selection == 'fourier'",
-                     br(),
-                     selectInput(inputId = "fourier_method_selection", choices = c("ar", "lomb", "pgram"), label = "Select the fourier method", selected = "lomb"),
-                     numericInput("ULFmin", "ULFmin", value = 0),
-                     
-                     numericInput("ULFmax", "ULFmax", value = 0.03),
-                     numericInput("VLFmin", "VLFmin", value = 0.03),
-                     
-                     numericInput("VLFmax", "VLFmax", value = 0.05),
-                     numericInput("LFmin", "LFmin", value = 0.05),
-                     
-                     numericInput("LFmax", "LFmax", value = 0.15),
-                     numericInput("HFmin", "HFmin", value = 0.15),
-                     numericInput("HFmax", "HFmax", value = 0.4)
-                   ),
-                   
-                   conditionalPanel(
-                     condition = "input.more_freq_options > 0 && input.frequency_type_selection == 'wavelet'",
-                     br(),
-                     selectInput(inputId = "wavelet_method_selection", choices = c("la8","la16","la20","d4","d6","d8","d16","bl14","bl20","fk4","fk6","fk8","fk14","fk22","mb4","mb8","mb16","mb24", "bs3.1"), label = "Select the wavelet type", selected = "d4"),
-                     #MIN Y MAXIMO???
-                     numericInput("band_tolerance_button", "Band tolerance", value = 0.1, min = 0.001),
-                     bsTooltip("band_tolerance_button", "Maximum acceptable error in the estimation of spectral bands", placement = "right")
-                   ),
-                   
-                   conditionalPanel(
-                     condition = "input.RHRV > 0",
-                     p("Calculating.... Please wait, it could take some minutes"),
-                     tableOutput("table_RHRV_analysis")
-                   ),
-                   
-                   textOutput("info_multiple_analysis")
-                 )
-               )
-      ),
-      
-      
-      
-      
-      #__LINEAR ANALYSIS____________________________________________________________
-      tabPanel("Single File Analysis",
-               selectInput(inputId = "linear_analysis_options", c("Time analysis", "Fourier analysis", "Wavelets analysis"), label = "Select the analysis", selected = " "),
-               selectInput(inputId = "type_of_file", c( "RR","Ascii", "Polar", "Suunto", "EDFPlus", "Ambit"), label = "Select the type of dile", selected = NULL),
-               
-               
-               
-               #_____TIME ANALYSIS__________________________________________________
-               conditionalPanel(
-                 condition = "input.linear_analysis_options == 'Time analysis'",
-                 sliderInput("window_size_slider", label = "Chose the window size", min = 50, max = 600, step = 1, value = 300),
-                 actionButton("Analyze_Time_Button", "Start"),
-                 textOutput("info_time_analysis"),
-                 plotOutput("plot_time_analysis"),
-                 tableOutput("table_time_analysis"),
-               ),
-               
-               #_____FREQUENCY ANALYSIS_____________________________________________
-               conditionalPanel(
-                 condition = "input.linear_analysis_options == 'Fourier analysis'",
-                 sliderInput("freq_size_slider", label = "Chose the window size", min = 2, max = 24, step = 1, value = 4),
-                 actionButton("Analyze_Fourier_Button", "Start"),
-                 textOutput("info_freq_analysis"),
-                 plotOutput("plot_freq_analysis"),
-                 tableOutput("table_freq_analysis"),
-               ),
-               
-               #_____WAVELETS ANALYSIS_____________________________________________
-               conditionalPanel(
-                 condition = "input.linear_analysis_options == 'Wavelets analysis'",
-                 actionButton("Analyze_Wave_Button", "Start"),
-                 textOutput("info_wave_analysis"),
-                 plotOutput("plot_wave_analysis"),
-                 tableOutput("table_wave_analysis"),
-               )
-               
-      ),
-      
-      # #__NON-LINEAR ANALYSIS______________________________________________________________
-      # tabPanel("Non-Linear Analysis",
-      #          h1("Do you want to perform a non-linear analysis?"),
-      #          selectInput(inputId = "non_linear_analysis_options", c("Saphiro", "Posthoc", "Statistical frequency analysis","Statistical time analysis", " "), label = "Select the analysis", selected = " "),
-      #          textOutput("non_linear_results")
-      # )
-      
+                 #__MULTIPLE FILES_____________________________________________________________
+                 tabPanel("Multiple Files Analysis",
+                          sidebarLayout(
+                            sidebarPanel(
+                              numericInput(inputId = "num_samples", label = "Number of samples", value = 1, min = 1, step = 1),
+                              bsTooltip("num_samples", "Press each button for folder selection", placement = "right"),
+                              uiOutput(outputId = "samples"),
+                              textOutput("info"),
+                              br(),
+                              actionButton("settings_button", label = icon("cog")),
+                              br(),
+                              
+                            ),
+                            
+                            
+                            mainPanel(
+                              br(),
+                              numericInput("significance_value", "Significance level", value = 0.05),
+                              
+                              h3("Correction method"),
+                              selectInput(inputId = "correction_method_selection", choices = c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"), selected = "bonferroni",  label =  "Please select the correction method"),
+                              
+                              p("When the analysis finishes, do you want to save a copy of the indexes?"),
+                              actionButton("save_yes", "Yes"),
+                              actionButton("save_no", "No"),
+                              #selectInput(inputId = "save_HRV_indexes", choices = c("Yes", "No"), selected = "No", label = "Want a copy of the analysis"),
+                              textOutput("save"),
+                              br(),
+                              textOutput("info_other_panel"),
+                              
+                              conditionalPanel(
+                                condition = ("input.save_yes > 0 || input.save_no > 0"),
+                                actionButton("RHRV", "RHRV study", class = "blue-button"),
+                                br(),
+                              ),
+                              
+                              conditionalPanel(
+                                condition = "input.RHRV > 0",
+                                p("Calculating.... Please wait, it could take some minutes"),
+                                tableOutput("table_RHRV_analysis")
+                              ),
+                              
+                              textOutput("info_multiple_analysis")
+                            )
+                          )
+                 ),
+                 
+                 #Settings
+                 tabPanel("Configuration",
+                          column(width = 6,
+                                 h3("Time analysis configuration"),
+                                 numericInput("window_size_button", "Window size (Value from 1 to 1000)", value = 300, min = 1, max = 1000),
+                                 bsTooltip("window_size_button", "The size of the window employed in time analysis. Default: 300 miliseconds", placement = "right"),
+                                 #LIMITAMOS MINIMO Y MAXIMO??? ENTRE 1 y 10??
+                                 numericInput("interval_size_button", "Interval", value = 7.8125),
+                                 bsTooltip("interval_size_button", "Bin width of the histogram. Default 7.8125", placement = "right"),
+                                 br(),
+                          ),
+                          
+                          
+                          column(width = 6,
+                                 h3("Frequency analysis configuration"),
+                                 numericInput("freqhr_button", "Frecuency size", value = 4, min = 1, max = 10),
+                                 bsTooltip("freqhr_button", "Frequency interpolation value. Default: 4 Hz", placement = "right"),
+                                 selectInput(inputId = "frequency_method_selection", c("linear", "spline"), label = "Select the interpolation method", selected = "spline"),
+                                 selectInput(inputId = "frequency_type_selection", c("fourier", "wavelet"), label = "Select the frequency type analysis", selected = "fourier"),
+                                 actionButton("more_freq_options", "More options"),
+                                 br(),
+                                 
+                                 conditionalPanel(
+                                   condition = "input.more_freq_options > 0 && input.frequency_type_selection == 'fourier'",
+                                   br(),
+                                   selectInput(inputId = "fourier_method_selection", choices = c("ar", "lomb", "pgram"), label = "Select the fourier method", selected = "lomb"),
+                                   numericInput("ULFmin", "ULFmin", value = 0),
+                                   
+                                   numericInput("ULFmax", "ULFmax", value = 0.03),
+                                   numericInput("VLFmin", "VLFmin", value = 0.03),
+                                   
+                                   numericInput("VLFmax", "VLFmax", value = 0.05),
+                                   numericInput("LFmin", "LFmin", value = 0.05),
+                                   
+                                   numericInput("LFmax", "LFmax", value = 0.15),
+                                   numericInput("HFmin", "HFmin", value = 0.15),
+                                   numericInput("HFmax", "HFmax", value = 0.4),
+                                   br()
+                                 ),
+                                 
+                                 conditionalPanel(
+                                   condition = "input.more_freq_options > 0 && input.frequency_type_selection == 'wavelet'",
+                                   br(),
+                                   selectInput(inputId = "wavelet_method_selection", choices = c("la8","la16","la20","d4","d6","d8","d16","bl14","bl20","fk4","fk6","fk8","fk14","fk22","mb4","mb8","mb16","mb24", "bs3.1"), label = "Select the wavelet type", selected = "d4"),
+                                   #MIN Y MAXIMO???
+                                   numericInput("band_tolerance_button", "Band tolerance", value = 0.1, min = 0.001),
+                                   bsTooltip("band_tolerance_button", "Maximum acceptable error in the estimation of spectral bands", placement = "right"),
+                                   br()
+                                 ),
+                          )
+                          
+                          
+                 ),
+                 
+                 
+                 #__LINEAR ANALYSIS____________________________________________________________
+                 tabPanel("Single File Analysis",
+                          sidebarLayout(
+                            sidebarPanel(  
+                              selectInput(inputId = "linear_analysis_options", c("Time analysis", "Fourier analysis", "Wavelets analysis"), label = "Select the analysis", selected = "Time analysis"),
+                              selectInput(inputId = "type_of_file", c( "RR","Ascii", "Polar", "Suunto", "EDFPlus", "Ambit"), label = "Select the type of file", selected = NULL),
+                              actionButton("file_selector", label = "Select file"),
+                              bsTooltip("file_selector", "Click to select file", placement = "right"),
+                              actionButton("settings_button2", label = icon("cog"), class ="right-btn"),
+                              bsTooltip("settings_button2", "Settings", placement = "right"),
+                              hr(),
+                              textOutput("single_file_info"),
+                            ),
+                            
+                            mainPanel(
+                              #_____TIME ANALYSIS_____________________________________________________________
+                              conditionalPanel(
+                                condition = "input.linear_analysis_options == 'Time analysis'",
+                                br(),
+                                textOutput("config_time_selection"),
+                                br(),
+                                actionButton("Analyze_Time_Button", "Time analysis", class = "blue-button"),
+                                textOutput("info_file_selection"),
+                                plotOutput("plot_time_analysis"),
+                                tableOutput("table_time_analysis"),
+                              ),
+                              
+                              #_____FREQUENCY ANALYSIS________________________________________________________
+                              conditionalPanel(
+                                condition = "input.linear_analysis_options == 'Fourier analysis'",
+                                br(),
+                                textOutput("config_fourier_selection"),
+                                br(),
+                                textOutput("config_fourier_selection2"),
+                                actionButton("Analyze_Fourier_Button", "Fourier analysis", class = "blue-button"),
+                                textOutput("info_freq_selection"),
+                                plotOutput("plot_freq_analysis"),
+                                tableOutput("table_freq_analysis"),
+                              ),
+                              
+                              #_____WAVELETS ANALYSIS_________________________________________________________
+                              conditionalPanel(
+                                condition = "input.linear_analysis_options == 'Wavelets analysis'",
+                                br(),
+                                textOutput("config_wave_selection"),
+                                br(),
+                                actionButton("Analyze_Wave_Button", "Wavelet analysis", class = "blue-button"),
+                                textOutput("info_wave_selection"),
+                                plotOutput("plot_wave_analysis"),
+                                tableOutput("table_wave_analysis"),
+                              )
+                            ))
+                          
+                 ),
+                 
+                 # #__NON-LINEAR ANALYSIS______________________________________________________________
+                 # tabPanel("Non-Linear Analysis",
+                 #          h1("Do you want to perform a non-linear analysis?"),
+                 #          selectInput(inputId = "non_linear_analysis_options", c("Saphiro", "Posthoc", "Statistical frequency analysis","Statistical time analysis", " "), label = "Select the analysis", selected = " "),
+                 #          textOutput("non_linear_results")
+                 # )
+                 
     )
   )
+  
+  
+  
+  
+  
+  
   
   ##SERVER########################################################################
   server <- function(input, output, session) {
     
     #__MULTIPLE ANALYSIS__________________________________________________
     #Creates buttons for the folder selection
-    observeEvent(input$go , {
+    observe({
       output$samples <- renderUI({
         num_samples <- input$num_samples
         br()
         samples <- lapply(seq_len(num_samples), function(i) {
-          actionButton(inputId = paste0("folder", i), label = paste0("Select folder ", i))
+          # actionButton(inputId = paste0("folder", i), label = paste0("Select folder ", i))
+          div(
+            actionButton(inputId = paste0("folder", i), label = paste0("Select folder ", i)),
+            style = "margin-bottom: 10px;" # Ajusta el valor del margen según tus necesidades
+          )
         })
         do.call(tagList, samples)
       })
     })
     
+    
     # Initialize the path files list
     file_paths <- reactiveVal(list())
     save_path <- reactiveVal
+    single_file <- reactiveValues(file_name = NULL, path_file = NULL)
     
     
     # Observes each button and updates the path list
@@ -1312,10 +1368,15 @@
           current_paths[[i]] <- path
           file_paths(current_paths)
           toggleClass(btn_id, "boton-pulsado")
-          output$info2 <- renderPrint({cat(paste0(file_paths() , " has been uploaded"))})
+          output$info <- renderPrint({cat(paste0(file_paths() , " has been uploaded"))})
         })
       }
     })
+    
+    #Comprobar que valores de otro panel cambian en el mio    
+    # output$info_other_panel <- renderPrint(
+    # input$freqhr_button
+    # )
     
     observeEvent(input$save_yes, {
       save_path <- normalizePath(choose.dir(caption = "Select the location where the results are going to be saved"))
@@ -1326,24 +1387,12 @@
       output$save <- renderPrint(cat("No copy will be done"))
     })
     
-    
-    # # observe(input$save_HRV_indexes == Yes,{
-    #    observe(input$save_HRV_indexes == Yes,{
-    #      if ('input$save_HRV_indexes == Yes'){
-    #      save_path <- normalizePath(choose.dir(caption = "Select the location where the results are going to be saved"))
-    #      output$save <- renderPrint({cat(paste0("Results will be available in: ", save_path))})
-    #      }else{
-    #        output$save <- renderPrint(cat("No path specified"))
-    #    }
-    #  })
-    
     observeEvent(input$RHRV, {
       output$info_multiple_analysis <-renderPrint({
         resultados <- RHRVEasy(file_paths(), input$significance_value)
         resultados <- capture.output(resultados)
         assign("Resultados", resultados, envir = .GlobalEnv)
         # resultados[resultados != ""]
-        
       })
       
       output$table_RHRV_analysis <- renderTable(
@@ -1352,66 +1401,130 @@
         # resultados <- capture.output(resultados),
         Resultados[Resultados != ""]
       )
-      
     })
+    
+    
+    #__MOVE_BUTTONS_________________________________________________________________    
+    observeEvent(input$settings_button, {
+      updateTabsetPanel(session, "tabset", selected = "Configuration")
+    })
+    
+    observeEvent(input$settings_button2, {
+      updateTabsetPanel(session, "tabset", selected = "Configuration")
+    })    
+    
     
     
     
     #__SINGLE_FILE_ANALYSIS_____________________________________________________
+    observeEvent(input$file_selector, {
+      path <- normalizePath(choose.files(caption = "Select the file to study"))
+      single_file$file_name <- basename(path)
+      single_file$path_file <- dirname(path)
+      output$single_file_info <- renderPrint(
+        cat(paste0("The file ", single_file$file_name, " has been uploaded from ", single_file$path_file))
+      )
+    })
+    
+    
+    
     #__TIME ANALYSIS____________________________________________________________
+    output$config_time_selection <- renderPrint(
+      cat(paste0("Time analysis with a window size: ", input$window_size_button, " and bin interval size: ", input$interval_size_button))  
+    )
+    
+    
     observeEvent(input$Analyze_Time_Button, {
-      file <- choose.files(caption = "Select the file")
-      hrv.data = preparing_analysis(file = basename(file), rrs =  dirname(file), format = input$type_of_file)
-      file_data = time_analysis(format = input$type_of_file , file = basename(file), size = input$window_size_slider, class = "linear", rrs2 = dirname(file))
-      
-      #Plot the file in the load data file
-      output$plot_time_analysis <- renderPlot({ PlotNIHR(hrv.data)  })
-      
-      #Print the name of the file
-      output$info_time_analysis <-  renderPrint({ cat(paste0("The file ",  basename(file), " has been uploaded"))  })
-      
-      #Shows the table with the time analysis
-      output$table_time_analysis <-  renderTable({file_data})
+      if(is.null(single_file$file_name)){
+        output$info_file_selection <- renderPrint(cat("Please select a file to study"))
+        observeEvent(input$file_selector, {output$info_file_selection <- renderPrint(cat(" "))})
+      } else {
+        hrv.data = preparing_analysis(file = single_file$file_name, rrs =  single_file$path_file, format = input$type_of_file)
+        file_data = time_analysis(format = input$type_of_file , file = single_file$file_name, size = input$window_size_button, class = input$frequency_method_selection, rrs2 =  single_file$path_file)
+        #Plot the file in the load data file
+        output$plot_time_analysis <- renderPlot({ PlotNIHR(hrv.data)  })
+        #Shows the table with the time analysis
+        output$table_time_analysis <-  renderTable({
+          nombres <- names(file_data)
+          table_results <- c(nombres)
+          table_results = rbind(table_results, file_data)
+          t(table_results)
+        })
+      }  
     })
     
     
     
     #__FREQUENCY ANALYSIS______________________________________________________________
-    observeEvent(input$Analyze_Fourier_Button, {
-      file <- choose.files(caption = "Select the file")
-      hrv.data = preparing_analysis(basename(file), dirname(file), input$type_of_file)
-      file_data = freq_analysis(format = input$type_of_file, file = basename(file), size = input$window_size_slider, class = "linear", rrs2 = dirname(file), freqhr = input$freq_size_slider, type = "fourier")
-      
-      #Plot the file in the load data file
-      output$plot_freq_analysis <- renderPlot({PlotNIHR(hrv.data) })
-      
-      #Print the name of the file and its datapath
-      output$info_freq_analysis <-  renderPrint({cat(paste0("The file ",  basename(file), " has been uploaded"))})
-      
-      #Shows the table with the time analysis
-      output$table_freq_analysis <-  renderTable({ file_data})
-    })
+    output$config_fourier_selection <- renderPrint(
+      cat(paste0("Fourier analysis with frequency size: ", input$freqhr_button, ", method: ", input$frequency_method_selection)),
+      #cat(paste0("Values. ULFmin: ", input$ULFmin, ", ULFmax: ", input$ULFmax, ", VLFmin: ", input$VLFmin, ", VLFmax: ", input$VLFmax, ", LFmin: ", input$LFmin, ", LFmax: ", input$LFmax, ", HFmin: ", input$HFmin, ", HFmax: ", input$HFmax))  
+    )
     
+    observeEvent(input$Analyze_Fourier_Button, {
+      if(is.null(single_file$file_name)){
+        output$info_freq_selection <- renderPrint(cat("Please select a file to study"))
+        observeEvent(input$file_selector, {output$info_freq_selection <- renderPrint(cat(" "))})
+      } else {
+        hrv.data = preparing_analysis(file = single_file$file_name, rrs =  single_file$path_file, format = input$type_of_file)
+        # file_data = freq_analysis(format = input$type_of_file, files = single_file$file_name,
+        #                           class = input$frequency_method_selection, rrs2 = single_file$path_file,
+        #                           freqhr = input$freq_size_slider,
+        #                           ULFmin = input$ULFmin, ULFmax = input$ULFmax, VLFmin = input$VLFmin, VLFmax = input$VLFmax,
+        #                           LFmin = input$LFmin, LFmax = input$LFmax, HFmin = input$HFmin, HFmax = input$HFmax)
+        
+        file_data = freq_analysis(format = input$type_of_file, files = single_file$file_name,
+                                  class = input$frequency_method_selection, rrs2 = single_file$path_file,
+                                  freqhr = input$freq_size_slider)
+        
+        #Plot the file in the load data file
+        output$plot_freq_analysis <- renderPlot({PlotNIHR(hrv.data) })
+        
+        #Print the name of the file and its datapath
+        output$info_freq_analysis <-  renderPrint({cat(paste0("The file ",  basename(file), " has been uploaded"))})
+        
+        #Shows the table with the time analysis
+        output$table_freq_analysis <-  renderTable({
+          nombres <- names(file_data)
+          table_results <- c(nombres)
+          table_results = rbind(table_results, file_data)
+          t(table_results)
+        })
+      }
+    })
     
     
     #__WAVELETS ANALYSIS______________________________________________________________
-    observeEvent(input$Analyze_Wave_Button, {
-      file <- choose.files(caption = "Select the file")
-      hrv.data = preparing_analysis(basename(file), dirname(file), input$type_of_file)
-      file_data = freq_analysis(format = input$type_of_file, file = basename(file), size = input$window_size_slider, class = "linear", rrs2 = dirname(file), type = "wavelet")
-      
-      #Plot the file in the load data file
-      output$plot_wave_analysis <- renderPlot({PlotNIHR(hrv.data) })
-      
-      #Print the name of the file and its datapath
-      output$info_wave_analysis <-  renderPrint({ cat(paste0("The file ",  basename(file), " has been uploaded")) })
-      
-      #Shows the table with the time analysis
-      output$table_wave_analysis <-  renderTable({ file_data  })
-    })
+    output$config_wave_selection <- renderPrint(
+      cat(paste0("Wavelet analysis with frequency size: ", input$freqhr_button, ", method: ", input$frequency_method_selection)),
+      #cat(paste0("Band tolerance: ", input$band_tolerance_button))
+    )
     
+    observeEvent(input$Analyze_Wave_Button, {
+      if(is.null(single_file$file_name)){
+        output$info_wave_selection <- renderPrint(cat("Please select a file to study"))
+        observeEvent(input$file_selector, {output$info_wave_selection <- renderPrint(cat(" "))})
+      } else {
+        hrv.data = preparing_analysis(file = single_file$file_name, rrs =  single_file$path_file, format = input$type_of_file)
+        file_data = freq_analysis(format = input$type_of_file, file = single_file$file_name, size = input$window_size_button,
+                                  class = input$frequency_method_selection, rrs2 =  single_file$path_file)
+        
+        #Plot the file in the load data file
+        output$plot_wave_analysis <- renderPlot({PlotNIHR(hrv.data) })
+        
+        #Print the name of the file and its datapath
+        output$info_wave_analysis <-  renderPrint({ cat(paste0("The file ",  basename(file), " has been uploaded")) })
+        
+        #Shows the table with the time analysis
+        output$table_wave_analysis <-  renderTable({
+          nombres <- names(file_data)
+          table_results <- c(nombres)
+          table_results = rbind(table_results, file_data)
+          t(table_results)
+        })
+      }  
+    })
   }
-  
   shinyApp(ui = ui, server = server)
   
 }
