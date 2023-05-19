@@ -997,7 +997,7 @@
           write_xlsx(frameTosave, fileName)
         },
         error=function(cond) {
-          message("There was an error when trying to save the results to the Ecel file")
+          message("There was an error when trying to save the results to the Excel file")
           message(cond)
         }
       )
@@ -1140,6 +1140,35 @@
       }
     "))),
     
+    tags$head(
+      tags$style(
+        HTML("
+      .table-style {
+        /* Estilos para la tabla */
+      }
+      .mi-tabla th {
+        /* Estilos para las celdas del encabezado */
+      }
+      .mi-tabla td {
+        /* Estilos para las celdas de datos */
+      }
+    ")
+      )
+    ),
+    
+    tags$head(
+      tags$style(
+        HTML("
+      .mi-columna td:first-child {
+        background-color: #cfe2f3; /* Fondo gris azulado */
+        font-weight: bold; /* Letras en negrita */
+      }
+    ")
+      )
+    ),
+    
+    
+    
     
     
     tabsetPanel( id = "tabset",
@@ -1151,7 +1180,9 @@
                    p("This app will allow you to obtain some graphical and statistical studies of your HRV samples"),
                    p("Just go through the different tabs and try them all"),
                    p("This app reads Ascii, RR, Ambit, Suunto and EDFPlus files"),
-                   p("If you have any problem, please contact us")
+                   p("If you have any problem, please contact us"),
+                   tags$img(src = "../Desktop/RHRVEasy-master/Heart-Rate-Variability-and-Sleep_EB-01-scaled.jpg", width = "800px")
+                   #img(src = "../Desktop/RHRVEasy-master/Heart-Rate-Variability-and-Sleep_EB-01-scaled.jpg", width = "300px")
                  ),
                  
                  
@@ -1384,24 +1415,36 @@
     })
     
     observeEvent(input$save_no, {
+      save_path <- FALSE
       output$save <- renderPrint(cat("No copy will be done"))
     })
     
     observeEvent(input$RHRV, {
-      output$info_multiple_analysis <-renderPrint({
-        resultados <- RHRVEasy(file_paths(), input$significance_value)
-        resultados <- capture.output(resultados)
-        assign("Resultados", resultados, envir = .GlobalEnv)
-        # resultados[resultados != ""]
-      })
+      # output$info_multiple_analysis <-renderPrint({
       
-      output$table_RHRV_analysis <- renderTable(
-        # resultados <- RHRVEasy(file_paths(), input$significance_value),
-        # #assign("Resultados", resultados, envir = .GlobalEnv)
-        # resultados <- capture.output(resultados),
-        Resultados[Resultados != ""]
-      )
+      resultados <- RHRVEasy(file_paths(), correction = TRUE, correctionMethod = input$correction_method_selection, verbose= TRUE,
+                             format = input$type_of_file, typeAnalysis = input$frequency_type_selection,
+                             significance_level = input$significance_value, nonLinear=FALSE,
+                             # saveHRVindexesInPath = save_path,
+                             size = input$window_size_button,
+                             #class = input$frequency_method_selection,
+                             freqhr = input$freq_size_slider )
+      #, saveHRVindexesInPath = save_path
+      
+      # resultados <- RHRVEasy(file_paths(), input$significance_value)
+      
+      resultados <- capture.output(resultados)
+      assign("Resultados", resultados, envir = .GlobalEnv)
+      # resultados[resultados != ""]
+      
+      
+      
+      
     })
+    output$table_RHRV_analysis <- renderTable(
+      Resultados[Resultados != ""]
+    )
+    #})
     
     
     #__MOVE_BUTTONS_________________________________________________________________    
@@ -1449,7 +1492,7 @@
           table_results <- c(nombres)
           table_results = rbind(table_results, file_data)
           t(table_results)
-        })
+        }, class = "mi-columna")
       }  
     })
     
