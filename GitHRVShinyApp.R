@@ -1,5 +1,4 @@
 {
-  
   library(RHRV)
   # Post hoc Dunn test
   library(dunn.test)
@@ -1202,6 +1201,7 @@
                             sidebarPanel(
                               numericInput(inputId = "num_samples", label = "Number of samples", value = 1, min = 1, step = 1),
                               bsTooltip("num_samples", "Press each button for folder selection", placement = "right"),
+                              selectInput("format_check", label = "Select the type of file", choices = c("RR","Ascii", "Polar", "Suunto", "EDFPlus", "Ambit"), selected = NULL),
                               uiOutput(outputId = "samples"),
                               textOutput("info"),
                               br(),
@@ -1229,13 +1229,15 @@
                               conditionalPanel(
                                 condition = ("input.save_yes > 0 || input.save_no > 0"),
                                 actionButton("RHRV", "RHRV study", class = "blue-button"),
+                                textOutput("console_info"),
                                 br(),
                               ),
                               
                               conditionalPanel(
                                 condition = "input.RHRV > 0",
                                 p("Calculating.... Please wait, it could take some minutes"),
-                                tableOutput("table_RHRV_analysis")
+                                tableOutput("table_RHRV_analysis"),
+                                textOutput("RHRV_results")
                               ),
                               
                               textOutput("info_multiple_analysis")
@@ -1270,20 +1272,30 @@
                                    br(),
                                    selectInput(inputId = "fourier_method_selection", choices = c("ar", "lomb", "pgram"), label = "Select the fourier method", selected = "lomb"),
                                    
-                                   # sliderInput("ULFmin", "ULFmin", value = 0, step = 0.001, min = 0, max = 0.003),
-                                   numericInput("ULFmin", "ULFmin", value = 0, step = 0.001, min = 0),
-                                   numericInput("ULFmax", "ULFmax", value = 0.003, step = 0.001),
+                                   numericInput("ULFmin", "ULFmin", value = 0, step = 0.001, min = 0, max = 0.03),
+                                   bsTooltip("ULFmin", "Standard values<br/>from 0 to 0,03<br/>ULFmin < ULFmax", placement = "right"),
+                                   
+                                   numericInput("ULFmax", "ULFmax", value = 0.03, step = 0.001),
+                                   bsTooltip("ULFmax", "Standard values<br/>from 0,03 to 0,05<br/>ULFmin < ULFmax < VLFmin", placement = "right"),
                                    
                                    numericInput("VLFmin", "VLFmin", value = 0.03, step = 0.001),
+                                   bsTooltip("VLFmin", "Standard values<br/>from 0,03 to 0,05<br/>ULFmax < VLFmin < VLFmax", placement = "right"),
+                                   
                                    numericInput("VLFmax", "VLFmax", value = 0.05, step = 0.001),
+                                   bsTooltip("VLFmax", "Standard values<br/>from 0,05 to 0,15<br/>VLFmin < VLFmax < LFmin", placement = "right"),
                                    
                                    numericInput("LFmin", "LFmin", value = 0.05, step = 0.001),
+                                   bsTooltip("LFmin", "Standard values<br/>from 0,05 to 0,15<br/>VLFmax < LFmin < LFmax", placement = "right"),
+                                   
                                    numericInput("LFmax", "LFmax", value = 0.15, step = 0.001),
+                                   bsTooltip("LFmax", "Standard values<br/>from 0,15 to 0,4<br/>LFmin < LFmax < HFmin", placement = "right"),
                                    
                                    numericInput("HFmin", "HFmin", value = 0.15, step = 0.001),
-                                   numericInput("HFmax", "HFmax", value = 0.4, step = 0.001, max = 1),
+                                   bsTooltip("HFmin", "Standard values<br/>from 0,15 to 0,4<br/>LFmax < HFmin < HFmax", placement = "right"),
                                    
-                                   textOutput("message_freq_values"),
+                                   numericInput("HFmax", "HFmax", value = 0.4, step = 0.001, max = 1),
+                                   bsTooltip("HFmax", "Standard values<br/>from 0,4 to 1<br/>HFmin < HFmax", placement = "right"),
+                                   
                                    br()
                                  ),
                                  
@@ -1354,16 +1366,7 @@
                                 tableOutput("table_wave_analysis"),
                               )
                             ))
-                          
                  ),
-                 
-                 # #__NON-LINEAR ANALYSIS______________________________________________________________
-                 # tabPanel("Non-Linear Analysis",
-                 #          h1("Do you want to perform a non-linear analysis?"),
-                 #          selectInput(inputId = "non_linear_analysis_options", c("Saphiro", "Posthoc", "Statistical frequency analysis","Statistical time analysis", " "), label = "Select the analysis", selected = " "),
-                 #          textOutput("non_linear_results")
-                 # )
-                 
     )
   )
   
@@ -1398,6 +1401,8 @@
     file_paths <- reactiveVal(list())
     save_path <- reactiveVal
     single_file <- reactiveValues(file_name = NULL, path_file = NULL)
+    console_messages <- reactiveVal(list(NULL))
+    #resultados2 <- reactiveVal(data.frame())
     
     
     # Observes each button and updates the path list
@@ -1424,6 +1429,7 @@
     
     observeEvent(input$save_yes, {
       save_path <- normalizePath(choose.dir(caption = "Select the location where the results are going to be saved"))
+      save_path <- paste0("\"", save_path,"\"")
       output$save <- renderPrint({cat(paste0("Results will be available in: ", save_path))})
     })
     
@@ -1444,19 +1450,27 @@
       #                      freqhr = input$freq_size_slider )
       #, saveHRVindexesInPath = save_path
       
-      resultados <- RHRVEasy(file_paths(), input$significance_value)
+      #resultados <- RHRVEasy(file_paths(), input$significance_value, size = input$window_size_button, saveHRVindexesInPath = save_path)
+      #file_paths <- gsub('\ ', "/", file_paths())
       
-      resultados <- capture.output(resultados)
-      assign("Resultados", resultados, envir = .GlobalEnv)
+      resultados_dataframe <- RHRVEasy(file_paths(), saveHRVindexesInPath = "../Desktop/RHRVEasy-master/rrs/")
+      assign("Resultados_dataframe", resultados_dataframe, envir = .GlobalEnv)
+      resultados_texto <- capture.output(resultados_dataframe)
+      #console_messages(c(console_messages, capture.output({RHRVEasy(file_paths(), input$significance_value)})))
+      assign("Resultados_texto", resultados_texto, envir = .GlobalEnv)
       # resultados[resultados != ""]
+      output$table_RHRV_analysis <- renderTable(
+        Resultados_texto[Resultados_texto != ""]
+        # #resultados[resultados != ""]
+      )
       
-      
-      
+      # output$RHRV_results <- renderPrint(
+      #   resultados,
+      # )
       
     })
-    output$table_RHRV_analysis <- renderTable(
-      Resultados[Resultados != ""]
-    )
+    
+    
     #})
     
     
@@ -1610,91 +1624,42 @@
       value_of_VLFmin <- input$VLFmin
       updateNumericInput(session, inputId = "ULFmax", max = value_of_VLFmin)
       updateNumericInput(session, inputId = "VLFmax", min = value_of_VLFmin)
-      
-      # if(input$VLFmin < input$ULFmax){
-      #   updateNumericInput(session, inputId = "ULFmax", value = (value_of_VLFmin))
-      #   showNotification("VLFmin must be higher or equal than ULFmax", duration = 3, closeButton = FALSE, type = "warning")
-      # } else if(input$VLFmax <= input$VLFmin){
-      #   updateNumericInput(session, inputId = "VLFmax", value = (value_of_VLFmin + 0.001))
-      #   showNotification("VLFmin must be lower than VLFmax", duration = 3, closeButton = FALSE, type = "warning")
-      # }    
     })
     
     observeEvent(input$VLFmax, {
       value_of_VLFmax <- input$VLFmax
       updateNumericInput(session, inputId = "VLFmin", max = value_of_VLFmax)
       updateNumericInput(session, inputId = "LFmin", min = value_of_VLFmax)
-      
-      # if(input$VLFmax <= input$VLFmin){
-      #   updateNumericInput(session, inputId = "VLFmin", value = (value_of_VLFmax - 0.001))
-      #   showNotification("VLFmax must be higher than VLFmin", duration = 3, closeButton = FALSE, type = "warning")
-      # } else if(input$LFmin < input$VLFmax){
-      #   updateNumericInput(session, inputId = "LFmin", value = (value_of_VLFmax))
-      #   showNotification("VLFmax must be lower or equal than LFmin", duration = 3, closeButton = FALSE, type = "warning")
-      # }    
     })
     
     observeEvent(input$LFmin, {
       value_of_LFmin <- input$LFmin
       updateNumericInput(session, inputId = "VLFmax", max = value_of_LFmin)
       updateNumericInput(session, inputId = "LFmax", min = value_of_LFmin)
-      
-      # if(input$LFmin < input$VLFmax){
-      #   updateNumericInput(session, inputId = "VLFmax", value = (value_of_LFmin))
-      #   showNotification("LFmin must be higher or equal than VLFmax", duration = 3, closeButton = FALSE, type = "warning")
-      # } else if(input$LFmax <= input$LFmin){
-      #   updateNumericInput(session, inputId = "LFmax", value = (value_of_LFmin + 0.001))
-      #   showNotification("LFmin must be lower than LFmax", duration = 3, closeButton = FALSE, type = "warning")
-      # }    
     })
     
     observeEvent(input$LFmax, {
       value_of_LFmax <- input$LFmax
       updateNumericInput(session, inputId = "LFmin", max = value_of_LFmax)
       updateNumericInput(session, inputId = "HFmin", min = value_of_LFmax)
-      
-      # if(input$LFmax <= input$LFmin){
-      #   updateNumericInput(session, inputId = "LFmin", value = (value_of_LFmax - 0.001))
-      #   showNotification("LFmax must be higher than LFmin", duration = 3, closeButton = FALSE, type = "warning")
-      # } else if(input$HFmin < input$LFmax){
-      #   updateNumericInput(session, inputId = "HFmin", value = (value_of_LFmax))
-      #   showNotification("LFmax must be lower or equal than HFmin", duration = 3, closeButton = FALSE, type = "warning")
-      # }    
     })
     
     observeEvent(input$HFmin, {
       value_of_HFmin <- input$HFmin
       updateNumericInput(session, inputId = "LFmax", max = value_of_HFmin)
       updateNumericInput(session, inputId = "HFmax", min = value_of_HFmin)
-      
-      # if(input$HFmin < input$LFmax){
-      #   updateNumericInput(session, inputId = "LFmax", value = (value_of_HFmin))
-      #   showNotification("HFmin must be higher or equal than LFmax", duration = 3, closeButton = FALSE, type = "warning")
-      # } else if(input$HFmax <= input$HFmin){
-      #   updateNumericInput(session, inputId = "HFmax", value = (value_of_HFmin + 0.001))
-      #   showNotification("HFmin must be lower than HFmax", duration = 3, closeButton = FALSE, type = "warning")
-      # }    
     })
     
     observeEvent(input$HFmax, {
       value_of_HFmax <- input$HFmax
       updateNumericInput(session, inputId = "HFmin", max = value_of_HFmax)
-      validate(
-        need(input$HFmax >= 0 & input$my_input <= 100, "El valor debe estar entre 0 y 100.")
-      )
-      if(input$HFmax <= input$HFmin){
-        updateNumericInput(session, inputId = "HFmin", value = (value_of_HFmax - 0.01))
-        showNotification("HFmax must be higher than HFmin", duration = 3, closeButton = FALSE, type = "warning")
-        output$message_freq_values <- renderPrint(
-          cat("HFmax must be higher than HFmin")
-        )
-      }else{
-        output$message_freq_values <- renderPrint(
-          input$HFmax
-        )
-      }
-      
     })
+    
+    
+    # output$console_info <- renderText(
+    #   console_messages(-1)
+    # )
+    
     
     
     
@@ -1703,3 +1668,52 @@
   shinyApp(ui = ui, server = server)
   
 }
+
+resultaditos <- RHRVEasy(folders = c("../Desktop/RHRVEasy-master/rrs/normal/", "../Desktop/RHRVEasy-master/rrs/chf/"), size = 250, saveHRVindexesInPath = save_path)
+save_path <- "../Desktop/RHRVEasy-master/rrs/"
+saveHRVindexes(resultaditos, save_path)
+
+
+'''
+EXAMPLE OF STACK OVERFLOW
+library(shiny)
+ui <- fluidPage(
+  titlePanel("Stream the system output"),
+  sidebarLayout(
+    sidebarPanel(
+      actionButton("btn_start",label = "Let's stream"),
+      actionButton("btn_stop",label = "Stop")
+    ),
+    mainPanel(
+      htmlOutput("textstream_output")
+    )
+  )
+)
+server <- function(input, output, session) {
+  rv <- reactiveValues(textstream = c(""),
+                       timer = reactiveTimer(1000),
+                       started = FALSE)
+  observeEvent(input$btn_start, {
+    rv$started <- TRUE
+    system2("Rscript", "so_script.R", wait = FALSE)
+  })
+  observeEvent(input$btn_stop, { rv$started <- FALSE })
+  observe({
+    rv$timer()
+    if (isolate(rv$started))
+      rv$textstream <- paste(readLines("so_output.txt"), collapse = "<br/>")
+  })
+  output$textstream_output <- renderUI({
+    HTML(rv$textstream)
+  })
+}
+shinyApp(ui = ui, server = server)
+
+cat('sink(file = "so_output.txt")
+  for (i in 1:10) {
+    cat(format(Sys.time(), format = "%H:%M:%S"), "\n")
+    Sys.sleep(1)
+  }
+  cat("*** EOF ***\n")
+  sink()
+', file = "so_script.R")
