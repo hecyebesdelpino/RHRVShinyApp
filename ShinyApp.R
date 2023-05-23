@@ -22,10 +22,15 @@ ui <- fluidPage(
         p("Just go through the different tabs and try them all"),
         p("This app reads Ascii, RR, Ambit, Suunto and EDFPlus files"),
         p("If you have any problem, please contact us"),
-        #tags$img(src = ".", width = "800px"),
-        img(src = ".", width = "300px")
+        # plotOutput("home_plot"),
+        # tags$img(src = "./Duda sobre resultados .png", width = "800px", height = "400px"),
+        # img(src = "./Heart-Rate-Variability-and-Sleep_EB-01-scaled.jpg", width = "800px", height = "400px")
       ),
-      
+      # tabPanel(
+      #   title = "IMAGES",
+      #   plotOutput("ceuceu"),
+      #   img(src = './ceu.png')
+      # ),
  
       #__MULTIPLE FILES_________________________________________________________
       tabPanel("Multiple Files Analysis", 
@@ -53,7 +58,6 @@ ui <- fluidPage(
                        p("When the analysis finishes, do you want to save a copy of the indexes?"),
                        actionButton("save_yes", label = "Yes"),
                        actionButton("save_no", label = "No"),
-                       #selectInput(inputId = "save_HRV_indexes", choices = c("Yes", "No"), selected = "No", label = "Want a copy of the analysis"),
                        textOutput("save"),
                        br(),
                        textOutput("info_other_panel"),
@@ -86,8 +90,7 @@ ui <- fluidPage(
                h3("Time analysis configuration"),
                numericInput("window_size_button", "Window size (Value from 1 to 1000)", value = 300, min = 1, max = 1000, step = 1),
                bsTooltip("window_size_button", "The size of the window employed in time analysis. Default: 300 miliseconds", placement = "right"),
-               #LIMITAMOS MINIMO Y MAXIMO??? ENTRE 1 y 10??
-               numericInput("interval_size_button", "Interval", value = 7.8125),
+               numericInput("interval_size_button", "Interval", value = 7.8125, step = 0.01),
                bsTooltip("interval_size_button", "Bin width of the histogram. Default 7.8125", placement = "right"),
                br(),
                ),
@@ -138,7 +141,6 @@ ui <- fluidPage(
                  condition = "input.more_freq_options > 0 && input.frequency_type_selection == 'wavelet'",
                  br(),
                  selectInput(inputId = "wavelet_method_selection", choices = c("la8","la16","la20","d4","d6","d8","d16","bl14","bl20","fk4","fk6","fk8","fk14","fk22","mb4","mb8","mb16","mb24", "bs3.1"), label = "Select the wavelet type", selected = "d4"),
-                 #MIN Y MAXIMO???
                  numericInput("band_tolerance_button", "Band tolerance", value = 0.1, min = 0.001),
                  bsTooltip("band_tolerance_button", "Maximum acceptable error in the estimation of spectral bands", placement = "right"),
                  br()
@@ -199,11 +201,11 @@ ui <- fluidPage(
                  plotOutput("plot_wave_analysis"),
                  tableOutput("table_wave_analysis"),
                )
-      )
-)
-      ),
-    )
+          )
+       )
+     ),
   )
+)
   
   
   
@@ -212,8 +214,12 @@ ui <- fluidPage(
   
   
 ##SERVER########################################################################
-  server <- function(input, output, session) {
+server <- function(input, output, session) {
     
+  # output$home_plot <-  renderImage({
+  #   list(src = "./ceu.png")
+  # })
+  
 #__MULTIPLE ANALYSIS__________________________________________________
         #Creates buttons for the folder selection
         observe({
@@ -221,10 +227,9 @@ ui <- fluidPage(
             num_samples <- input$num_samples
             br()
             samples <- lapply(seq_len(num_samples), function(i) {
-             # actionButton(inputId = paste0("folder", i), label = paste0("Select folder ", i))
               div(
                 actionButton(inputId = paste0("folder", i), label = paste0("Select folder ", i)),
-                style = "margin-bottom: 10px;" # Ajusta el valor del margen según tus necesidades
+                style = "margin-bottom: 10px;" 
               )
             })
             do.call(tagList, samples)
@@ -237,7 +242,7 @@ ui <- fluidPage(
          save_path <- reactiveVal()
          single_file <- reactiveValues(file_name = NULL, path_file = NULL)
          console_messages <- reactiveVal(list(NULL))
-         #resultados2 <- reactiveVal(data.frame())
+
     
         
         # Observes each button and updates the path list
@@ -257,10 +262,6 @@ ui <- fluidPage(
           }
         })
     
-        #Comprobar que valores de otro panel cambian en el mio    
-        # output$info_other_panel <- renderPrint(
-        # input$freqhr_button 
-        # )
         
         #Save at the end in case user wants now regrets
         observeEvent(input$save_2, {
@@ -282,41 +283,11 @@ ui <- fluidPage(
         })
         
         observeEvent(input$RHRV, {
-         # output$info_multiple_analysis <-renderPrint({
-          
-            # resultados <- RHRVEasy(file_paths(), correction = TRUE, correctionMethod = input$correction_method_selection, verbose= TRUE,
-            #                      format = input$type_of_file, typeAnalysis = input$frequency_type_selection,
-            #                      significance_level = input$significance_level, nonLinear=FALSE, 
-            #                      # saveHRVindexesInPath = save_path,
-            #                      size = input$window_size_button,
-            #                      #class = input$frequency_method_selection,
-            #                      freqhr = input$freqhr_button )
-            #, saveHRVindexesInPath = save_path
-
-            #resultados <- RHRVEasy(file_paths(), input$significance_level, size = input$window_size_button, saveHRVindexesInPath = save_path)
-            #file_paths <- gsub('\ ', "/", file_paths())
-            
             #update_action_button(session, "save_2", disabled = TRUE)
             # update_action_button(session, "save_yes", disable = TRUE)
             # update_action_button(session, "save_no", disable = TRUE)
-          
-           # calculatePowerBand <-function (HRVData, indexFreqAnalysis = length(HRVData$FreqAnalysis), 
-           #          size, shift, sizesp = NULL, scale = "linear", ULFmin = 0, 
-           #          ULFmax = 0.03, VLFmin = 0.03, VLFmax = 0.05, LFmin = 0.05, 
-           #          LFmax = 0.15, HFmin = 0.15, HFmax = 0.4, 
-           #          type = c("fourier","wavelet"), wavelet = "d4", bandtolerance = 0.01, relative = FALSE, 
-           #          verbose = NULL) 
-           #  
-           #  lo llama desde fourier
-           #  calculatePSD <-function (HRVData, indexFreqAnalysis = length(HRVData$FreqAnalysis), 
-           #                           method = c("pgram", "ar", "lomb"), doPlot = T, ...) 
-           #  
-           #  Lo llama desde fourier  
-           #  InterpolateNIHR <-function (HRVData, freqhr = 4, method = c("linear", "spline")
-          
             path_save <- save_path()
             resultados_dataframe <- RHRVEasy(folders = file_paths(), 
-                                             #correction = TRUE ??PONEMOS FALSE CUANDO COJA NONE??
                                              #correctionMethod = input$correction_method_selection,
                                              format = input$format_check,
                                              #typeAnalysis = input$frequency_type_selection,
@@ -325,8 +296,6 @@ ui <- fluidPage(
                                              #Time analysis arguments
                                              #size = input$window_size_button,
                                              #interval = input$interval_size_button,
-                                             
-                                             
                                              # #Freq analysis arguments
                                              # freqhr = input$freqhr_button,
                                              # 
@@ -334,7 +303,6 @@ ui <- fluidPage(
                                              # #method = input$frequency_method_selection,
                                              # #En la funcion de wavelet, se llama tipo
                                              # type = input$frequency_method_selection,
-                                             # 
                                              # 
                                              # #CalculatePSD
                                              # #method = input$fourier_method_selection,
@@ -355,12 +323,9 @@ ui <- fluidPage(
             
             assign("Resultados_dataframe", resultados_dataframe, envir = .GlobalEnv)
             resultados_texto <- capture.output(resultados_dataframe)
-            #console_messages(c(console_messages, capture.output({RHRVEasy(file_paths(), input$significance_level)})))
             assign("Resultados_texto", resultados_texto, envir = .GlobalEnv)
-            # resultados[resultados != ""]
             output$table_RHRV_analysis <- renderTable(
              Resultados_texto[Resultados_texto != ""]
-            # #resultados[resultados != ""]
             )
             
             # if(is.NULL(path_save)){
@@ -368,17 +333,10 @@ ui <- fluidPage(
             # }
             # update_action_button(session, "save_yes", disable = FALSE)
             # update_action_button(session, "save_no", disable = FALSE)
-            
-            # output$RHRV_results <- renderPrint(
-            #   resultados,
-            # )
-          
-            })
         
           
-        #})
-    
-
+       })
+        
 #__MOVE_BUTTONS_________________________________________________________________    
         observeEvent(input$settings_button, {
           updateTabsetPanel(session, "tabset", selected = "Configuration")
@@ -393,12 +351,12 @@ ui <- fluidPage(
     
 #__SINGLE_FILE_ANALYSIS_____________________________________________________
       observeEvent(input$file_selector, {
-        path <- normalizePath(choose.files(caption = "Select the file to study"))
-        single_file$file_name <- basename(path) 
-        single_file$path_file <- dirname(path)
-        output$single_file_info <- renderPrint(
-          cat(paste0("The file ", single_file$file_name, " has been uploaded from ", single_file$path_file))
-        )
+          path <- normalizePath(choose.files(caption = "Select the file to study"))
+          single_file$file_name <- basename(path) 
+          single_file$path_file <- dirname(path)
+          output$single_file_info <- renderPrint(
+            cat(paste0("The file ", single_file$file_name, " has been uploaded from ", single_file$path_file))
+          )
       })
    
         
@@ -413,11 +371,17 @@ ui <- fluidPage(
       if(is.null(single_file$file_name)){
         output$info_file_selection <- renderPrint(cat("Please select a file to study"))
         observeEvent(input$file_selector, {output$info_file_selection <- renderPrint(cat(" "))})
-      } else {
+      }else {
         hrv.data = preparing_analysis(file = single_file$file_name, rrs =  single_file$path_file, format = input$type_of_file)
-        file_data = time_analysis(format = input$type_of_file , file = single_file$file_name, size = input$window_size_button, class = input$frequency_method_selection, rrs2 =  single_file$path_file) 
+        file_data = time_analysis(format = input$type_of_file , 
+                                  files = single_file$file_name, 
+                                  class = input$frequency_method_selection, 
+                                  rrs2 =  single_file$path_file, 
+                                  size = input$window_size_button, 
+                                  interval = input$interval_size_button)
+                                  
         #Plot the file in the load data file
-        output$plot_time_analysis <- renderPlot({ PlotNIHR(hrv.data)  })
+        output$plot_time_analysis <- renderPlot({ PlotNIHR(hrv.data)})
         #Shows the table with the time analysis
         output$table_time_analysis <-  renderTable({
           nombres <- names(file_data)
@@ -433,8 +397,7 @@ ui <- fluidPage(
 #__FREQUENCY ANALYSIS______________________________________________________________
     output$config_fourier_selection <- renderPrint(
       cat(paste0("Fourier analysis with frequency size: ", input$freqhr_button, ", method: ", input$frequency_method_selection)),
-      #cat(paste0("Values. ULFmin: ", input$ULFmin, ", ULFmax: ", input$ULFmax, ", VLFmin: ", input$VLFmin, ", VLFmax: ", input$VLFmax, ", LFmin: ", input$LFmin, ", LFmax: ", input$LFmax, ", HFmin: ", input$HFmin, ", HFmax: ", input$HFmax))  
-    )
+      )
     
     observeEvent(input$Analyze_Fourier_Button, {
       if(is.null(single_file$file_name)){
@@ -442,21 +405,20 @@ ui <- fluidPage(
         observeEvent(input$file_selector, {output$info_freq_selection <- renderPrint(cat(" "))})
       } else {
         hrv.data = preparing_analysis(file = single_file$file_name, rrs =  single_file$path_file, format = input$type_of_file)
-        # file_data = freq_analysis(format = input$type_of_file, files = single_file$file_name, 
-        #                           class = input$frequency_method_selection, rrs2 = single_file$path_file, 
-        #                           freqhr = input$freqhr_button, 
-                                  
-        
-        file_data = freq_analysis(format = input$type_of_file, files = single_file$file_name, 
-                                  class = input$frequency_method_selection, rrs2 = single_file$path_file, 
+        file_data = freq_analysis(format = input$type_of_file, 
+                                  files = single_file$file_name, 
+                                  class = input$frequency_method_selection, 
+                                  rrs2 = single_file$path_file, 
                                   freqhr = input$freqhr_button,
+                                  #method = input$frequency_method_selection #linear or spline in Interpolate function
+                                  #method = input$fourier_method_selection #pgram, ar, lomb in CalculatePSD
                                   ULFmin = input$ULFmin, ULFmax = input$ULFmax, 
                                   VLFmin = input$VLFmin, VLFmax = input$VLFmax,
                                   LFmin = input$LFmin, LFmax = input$LFmax, 
                                   HFmin = input$HFmin, HFmax = input$HFmax)
         
         #Plot the file in the load data file
-        output$plot_freq_analysis <- renderPlot({PlotNIHR(hrv.data) })
+        output$plot_freq_analysis <- renderPlot({PlotNIHR(hrv.data)})
         
         #Print the name of the file and its datapath
         output$info_freq_analysis <-  renderPrint({cat(paste0("The file ",  basename(file), " has been uploaded"))})
@@ -475,7 +437,6 @@ ui <- fluidPage(
 #__WAVELETS ANALYSIS______________________________________________________________
     output$config_wave_selection <- renderPrint(
       cat(paste0("Wavelet analysis with frequency size: ", input$freqhr_button, ", method: ", input$frequency_method_selection)),
-      #cat(paste0("Band tolerance: ", input$band_tolerance_button))
     )
     
     observeEvent(input$Analyze_Wave_Button, {
@@ -484,21 +445,40 @@ ui <- fluidPage(
         observeEvent(input$file_selector, {output$info_wave_selection <- renderPrint(cat(" "))})
       } else {
         hrv.data = preparing_analysis(file = single_file$file_name, rrs =  single_file$path_file, format = input$type_of_file)
-        file_data = freq_analysis(format = input$type_of_file, file = single_file$file_name, size = input$window_size_button, 
-                                  class = input$frequency_method_selection, rrs2 =  single_file$path_file)
+        file_data = wavelet_analysis(format = input$type_of_file, 
+                                  files = single_file$file_name, 
+                                  #class = input$frequency_method_selection, 
+                                  rrs2 = single_file$path_file,
+                                  freqhr = input$freqhr_button,
+                                  method = input$frequency_method_selection,
+                                  size = input$window_size_button,
+                                  verbose = TRUE,
+                                  shift = 0, #Qué valor ponemos??
+                                  type = input$frequency_method_selection,
+                                  ULFmin = input$ULFmin,
+                                  ULFmax = input$ULFmax,
+                                  VLFmin = input$VLFmin,
+                                  VLFmax = input$VLFmax,
+                                  LFmin = input$LFmin,
+                                  LFmax = input$LFmax,
+                                  HFmin = input$HFmin,
+                                  HFmax = input$HFmax,
+                                  wavelet = input$wavelet_method_selection,
+                                  bandtolerance = input$band_tolerance_button
+                                  )
       
       #Plot the file in the load data file
-      output$plot_wave_analysis <- renderPlot({PlotNIHR(hrv.data) })
+      output$plot_wave_analysis <- renderPlot({PlotNIHR(hrv.data)})
       
       #Print the name of the file and its datapath
       output$info_wave_analysis <-  renderPrint({ cat(paste0("The file ",  basename(file), " has been uploaded")) })
       
       #Shows the table with the time analysis
       output$table_wave_analysis <-  renderTable({
-        nombres <- names(file_data)
-        table_results <- c(nombres)
-        table_results = rbind(table_results, file_data)
-        t(table_results)
+          nombres <- names(file_data)
+          table_results <- c(nombres)
+          table_results = rbind(table_results, file_data)
+          t(table_results)
       })
       }  
     })
