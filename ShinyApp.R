@@ -24,7 +24,7 @@ ui <- fluidPage(
         p("If you have any problem, please contact us"),
         # plotOutput("home_plot"),
         # tags$img(src = "./Duda sobre resultados .png", width = "800px", height = "400px"),
-        # img(src = "./Heart-Rate-Variability-and-Sleep_EB-01-scaled.jpg", width = "800px", height = "400px")
+        #img(src = "./corazonlogo.png", width = "400px", height = "400px")
       ),
       # tabPanel(
       #   title = "IMAGES",
@@ -305,7 +305,7 @@ server <- function(input, output, session) {
                                              # type = input$frequency_method_selection,
                                              # 
                                              # #CalculatePSD
-                                             # #method = input$fourier_method_selection,
+                                             # #method2 = input$fourier_method_selection,
                                              # 
                                              # ULFmin = input$ULFmin, 
                                              # ULFmax = input$ULFmax, 
@@ -319,13 +319,13 @@ server <- function(input, output, session) {
                                              # #Wavelet arguments
                                              # wavelet = input$wavelet_method_selection,
                                              #bandtolerance = input$band_tolerance_button
-                                             )
+                                              )
             
             assign("Resultados_dataframe", resultados_dataframe, envir = .GlobalEnv)
             resultados_texto <- capture.output(resultados_dataframe)
             assign("Resultados_texto", resultados_texto, envir = .GlobalEnv)
             output$table_RHRV_analysis <- renderTable(
-             Resultados_texto[Resultados_texto != ""]
+            Resultados_texto[Resultados_texto != ""]
             )
             
             # if(is.NULL(path_save)){
@@ -500,7 +500,7 @@ server <- function(input, output, session) {
   
 }
 
-# resultaditos <- RHRVEasy(folders = c("../Desktop/RHRVEasy-master/rrs/normal/", "../Desktop/RHRVEasy-master/rrs/chf/"), size = 250, freqhr = 6, saveHRVindexesInPath = "../Desktop/RHRVEasy-master/rrs/")
+# resultaditos <- RHRVEasy(folders = c("C://Users/hyebe/Desktop/RHRVEasy-master/rrs/normal/", "C://Users/hyebe/Desktop/RHRVEasy-master/rrs/chf/"), size = 250, freqhr = 6, saveHRVindexesInPath = "C://Users/hyebe/Desktop/RHRVEasy-master/rrs/")
 # save_path <- "../Desktop/RHRVEasy-master/rrs/"
 # saveHRVindexes(resultaditos, save_path)
 
