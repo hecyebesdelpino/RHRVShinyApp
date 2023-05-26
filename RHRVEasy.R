@@ -801,7 +801,7 @@ print.RHRVEasyResult <- function(results){
             results$pValues[[column]], "\n")
         
         for (i in 1:length(listDF)){
-          group = levels(results$TimeAnalysis$group)[i]
+          group = levels(as.factor(results$TimeAnalysis$group))[i]
           cat(column, " for the group", levels(results$TimeAnalysis$group)[i], "is",
               mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
               sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
@@ -815,12 +815,12 @@ print.RHRVEasyResult <- function(results){
         cat("\nThere is a statistically significant difference in", column, "; pvalue: ",
             results$pValues[[column]], "\n")
         
-        # for (i in 1:length(listDF)){
-        #   group = levels(results$TimeAnalysis$group)[i]
-        #   cat(column, " for the group ", levels(results$TimeAnalysis$group)[i], "is",
-        #       mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
-        #       sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
-        # }
+        for (i in 1:length(listDF)){
+          group = levels(as.factor(results$TimeAnalysis$group))[i]
+          cat(column, " for the group ", levels(results$TimeAnalysis$group)[i], "is",
+              mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
+              sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
+        }
         
       }
     }
@@ -852,12 +852,12 @@ print.RHRVEasyResult <- function(results){
         cat("\nThere is a statistically significant difference in", column,  "; pvalue: ",
             results$pValues[[column]], "\n")
         
-        # for (i in 1:length(listDF)){
-        #   group = levels(results$TimeAnalysis$group)[i]
-        #   cat(column, " for the group", levels(results$TimeAnalysis$group)[i], "is",
-        #       mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
-        #       sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
-        # }
+        for (i in 1:length(listDF)){
+          group = levels(as.factor(results$TimeAnalysis$group))[i]
+          cat(column, " for the group", levels(results$TimeAnalysis$group)[i], "is",
+              mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
+              sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
+        }
       }
     }
     #report anova
@@ -868,7 +868,7 @@ print.RHRVEasyResult <- function(results){
             results$pValues[[column]], "\n")
         
         for (i in 1:length(listDF)){
-          group = levels(results$TimeAnalysis$group)[i]
+          group = levels(as.factor(results$TimeAnalysis$group))[i]
           cat(column, " for the group ", levels(results$TimeAnalysis$group)[i], "is",
               mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
               sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
@@ -921,12 +921,12 @@ print.RHRVEasyResult <- function(results){
           cat("\nThere is a statistically significant difference in", column,
               "; pvalue: ", results$pValues[[column]], "\n")
           
-          # for (i in 1:length(listDF)){
-          #   group = levels(results$TimeAnalysis$group)[i]
-          #   cat(column, " for the group", levels(results$TimeAnalysis$group)[i], "is",
-          #       mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
-          #       sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
-          # }
+          for (i in 1:length(listDF)){
+            group = levels(as.factor(results$TimeAnalysis$group))[i]
+            cat(column, " for the group", levels(results$TimeAnalysis$group)[i], "is",
+                mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
+                sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
+          }
         }
       }
       #report anova
@@ -937,7 +937,7 @@ print.RHRVEasyResult <- function(results){
               "; pvalue: ", results$pValues[[column]], "\n")
           
           for (i in 1:length(listDF)){
-            group = levels(results$TimeAnalysis$group)[i]
+            group = levels(as.factor(results$TimeAnalysis$group))[i]
             cat(column, " for the group ", levels(results$TimeAnalysis$group)[i], "is",
                 mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
                 sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
