@@ -797,12 +797,12 @@ print.RHRVEasyResult <- function(results){
       #report kruskal
       if(!is.na(results$pValues[[column]]) && results$pValues[[column]]<signif_level){#error pvalue 1
         differencesFound = TRUE
-        cat("\nThere is a statistically significant difference in", column,  "; pvalue: ",
+        cat("\nThere is a statistically significant difference in", column,  "; pvalue = ",
             results$pValues[[column]], "\n")
         
         for (i in 1:length(listDF)){
           group = levels(as.factor(results$TimeAnalysis$group))[i]
-          cat(column, " for the group", levels(results$TimeAnalysis$group)[i], "is",
+          cat(column, " for the group", levels(as.factor(results$TimeAnalysis$group))[i], "is: ",
               mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
               sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
         }
@@ -812,12 +812,12 @@ print.RHRVEasyResult <- function(results){
     else{
       if(!is.na(results$pValues[[column]]) && results$pValues[[column]]<signif_level){
         differencesFound = TRUE
-        cat("\nThere is a statistically significant difference in", column, "; pvalue: ",
+        cat("\nThere is a statistically significant difference in", column, "; pvalue = ",
             results$pValues[[column]], "\n")
         
         for (i in 1:length(listDF)){
           group = levels(as.factor(results$TimeAnalysis$group))[i]
-          cat(column, " for the group ", levels(results$TimeAnalysis$group)[i], "is",
+          cat(column, " for the group ", levels(as.factor(results$TimeAnalysis$group))[i], "is: ",
               mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
               sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
         }
@@ -849,12 +849,12 @@ print.RHRVEasyResult <- function(results){
       #report kruskal
       if(results$pValues[[column]]<signif_level){#error pvalue 1
         differencesFound = TRUE
-        cat("\nThere is a statistically significant difference in", column,  "; pvalue: ",
+        cat("\nThere is a statistically significant difference in", column,  "; pvalue = ",
             results$pValues[[column]], "\n")
         
         for (i in 1:length(listDF)){
           group = levels(as.factor(results$TimeAnalysis$group))[i]
-          cat(column, " for the group", levels(results$TimeAnalysis$group)[i], "is",
+          cat(column, " for the group", levels(as.factor(results$TimeAnalysis$group))[i], "is: ",
               mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
               sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
         }
@@ -864,12 +864,12 @@ print.RHRVEasyResult <- function(results){
     else{
       if(results$pValues[[column]]<signif_level){
         differencesFound = TRUE
-        cat("\nThere is a statistically significant difference in", column, "; pvalue: ",
+        cat("\nThere is a statistically significant difference in", column, "; pvalue = ",
             results$pValues[[column]], "\n")
         
         for (i in 1:length(listDF)){
           group = levels(as.factor(results$TimeAnalysis$group))[i]
-          cat(column, " for the group ", levels(results$TimeAnalysis$group)[i], "is",
+          cat(column, " for the group ", levels(as.factor(results$TimeAnalysis$group))[i], "is: ",
               mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
               sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
         }
@@ -918,12 +918,11 @@ print.RHRVEasyResult <- function(results){
         #report kruskal
         if(results$pValues[[column]]<signif_level){#error pvalue 1
           differencesFound = TRUE
-          cat("\nThere is a statistically significant difference in", column,
-              "; pvalue: ", results$pValues[[column]], "\n")
+          cat("\nThere is a statistically significant difference in", column, "; pvalue = ", results$pValues[[column]], "\n")
           
           for (i in 1:length(listDF)){
             group = levels(as.factor(results$TimeAnalysis$group))[i]
-            cat(column, " for the group", levels(results$TimeAnalysis$group)[i], "is",
+            cat(column, " for the group", levels(as.factor(results$TimeAnalysis$group))[i], "is: ",
                 mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
                 sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
           }
@@ -933,12 +932,11 @@ print.RHRVEasyResult <- function(results){
       else{
         if(results$pValues[[column]]<signif_level){
           differencesFound = TRUE
-          cat("\nThere is a statistically significant difference in", column,
-              "; pvalue: ", results$pValues[[column]], "\n")
+          cat("\nThere is a statistically significant difference in", column, "; pvalue = ", results$pValues[[column]], "\n")
           
           for (i in 1:length(listDF)){
             group = levels(as.factor(results$TimeAnalysis$group))[i]
-            cat(column, " for the group ", levels(results$TimeAnalysis$group)[i], "is",
+            cat(column, " for the group ", levels(as.factor(results$TimeAnalysis$group))[i], "is: ",
                 mean(listDF[[group]][[column]], na.rm = TRUE), "+-",
                 sd(listDF[[group]][[column]], na.rm = TRUE), "\n")
           }
