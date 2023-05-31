@@ -65,7 +65,6 @@ wavelet_single_analysis <- function(fileType, Recordname, RecordPath, freqhr, me
 
 
 
-
 #RESULTS
 #MULTIPLE TABLE
 multiple_results <- function(resultados_dataframe){
@@ -79,8 +78,9 @@ multiple_results <- function(resultados_dataframe){
     #matriz[,2] <-  sub("^There is a statistically.*", "File", matriz[,2]) 
     matriz[,3] <-  sub(".*: ", "", matriz[,3]) 
     matriz[, 3] <- sub(".*; ", "", matriz[, 3])
+    matriz[, 3] <- gsub("\\+-", "+/-", matriz[, 3])
     matriz[1][1] <- "RESULTS"
-
+    colnames(matriz) <- c(' ','RESULTS',' ')
 return(matriz)
 }
 
