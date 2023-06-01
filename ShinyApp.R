@@ -50,7 +50,7 @@ ui <- fluidPage(
 
                  mainPanel(
                        br(),
-                       numericInput("significance_level", "Significance level", value = 0.05),
+                       numericInput("significance_level", "Significance level", value = 0.05, step = 0.001),
                        h3("Correction method"),
                        selectInput(inputId = "correction_method_selection", choices = c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"), selected = "bonferroni",  label =  "Please select the correction method"),
                        textOutput("save_message"),
@@ -149,21 +149,14 @@ ui <- fluidPage(
       tabPanel("Settings",
                column(width = 4,
                h3("Window configuration"),
-               column(width = 12,
-               numericInput("window_size_button", "Window size", value = 300, min = 1, max = 1000, step = 1),
-               bsTooltip("window_size_button", "The size of the window employed in time analysis. Default: 300 miliseconds", placement = "right"),
-               numericInput("interval_size_button", "Interval", value = 7.8125, step = 0.01),
-               bsTooltip("interval_size_button", "Bin width of the histogram. Default 7.8125", placement = "right"),
-               numericInput("window_shift_button", "Shift", value = 150, min = 1, max = 500, step = 1),
-               br(),
-               br(),
-               br(),
-               br(),
-               br(),
-               actionButton("restoreValues", "Restore"),
-               bsTooltip("restoreValues", "Restore to default values in frequency intervals", placement = "left"),
-               br()
-               )
+                   column(width = 12,
+                   numericInput("window_size_button", "Window size", value = 300, min = 1, max = 1000, step = 1),
+                   bsTooltip("window_size_button", "The size of the window employed in time analysis. Default: 300 miliseconds", placement = "right"),
+                   numericInput("interval_size_button", "Interval", value = 7.8125, step = 0.01),
+                   bsTooltip("interval_size_button", "Bin width of the histogram. Default 7.8125", placement = "right"),
+                   numericInput("window_shift_button", "Shift", value = 150, min = 1, max = 500, step = 1),
+                   br(),
+                   )
                ),
 
                column(width = 8,
@@ -210,8 +203,15 @@ ui <- fluidPage(
                      textOutput("freq_intervals"),
                      br()
                    ),
-              )
-      ),
+              ),
+              fixedRow(
+                column(width = 3, offset = 1,
+                       align = "left",
+                       actionButton("restoreValues", "Restore", class = "green-button"),
+                       bsTooltip("restoreValues", "Restore to default values in frequency intervals", placement = "right")
+                )
+              ),
+        ),
   )
 )
   
@@ -515,6 +515,8 @@ server <- function(input, output, session) {
         observeEvent(input$interval_size_button, {settings_restrictions(session, input)})
         observeEvent(input$band_tolerance_button, {settings_restrictions(session, input)})
         observeEvent(input$freqhr_button, {settings_restrictions(session, input)})
+        observeEvent(input$num_samples, {settings_restrictions(session, input)})
+        observeEvent(input$significance_level, {settings_restrictions(session, input)})
         
         
         #Button for restoring default values    
@@ -530,7 +532,7 @@ server <- function(input, output, session) {
             updateNumericInput(session, inputId = "HFmin", value = 0.150)
             updateNumericInput(session, inputId = "HFmax", value = 0.400)
             updateNumericInput(session, inputId = "window_size_button", value = 300)
-            updateNumericInput(session, inputId = "window_shift_button", value = 0.400)
+            updateNumericInput(session, inputId = "window_shift_button", value = 150)
             updateNumericInput(session, inputId = "interval_size_button", value = 7.8125)
             updateNumericInput(session, inputId = "band_tolerance_button", value = 0.1)
             updateNumericInput(session, inputId = "freqhr_button", value = 4)
