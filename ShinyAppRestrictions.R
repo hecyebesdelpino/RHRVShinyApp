@@ -243,6 +243,35 @@ settings_restrictions <- function(session, input) {
       }
       )
       
+      
+      observeEvent(input$num_samples, {
+        num_samples <- input$num_samples
+        tryCatch({
+          if(num_samples < 1){
+            updateNumericInput(session, inputId = "num_samples", value = 2 )
+            showNotification("Please, number of samples must be higher than 0", duration = 3, closeButton = FALSE, type = "warning")
+          } else{
+            updateNumericInput(session, inputId = "num_samples", value = num_samples)
+          }
+        }, error = function(e) {
+        })
+      }
+      )
+      
+      
+      observeEvent(input$significance_level, {
+        sig_level <- input$significance_level
+        tryCatch({
+          if(sig_level <= 0 || sig_level >= 1){
+            updateNumericInput(session, inputId = "significance_level", value = 0.05 )
+            showNotification("Please, significance level must be between 0 and 1", duration = 3, closeButton = FALSE, type = "warning")
+          } else{
+            updateNumericInput(session, inputId = "significance_level", value = sig_level)
+          }
+        }, error = function(e) {
+        })
+      }
+      )
   
 }
 
