@@ -92,6 +92,8 @@ ui <- fluidPage(
                   bsTooltip("file_selector", "Click to select file", placement = "right"),
                   actionButton("settings_button2", label = icon("cog"), class ="right-btn"),
                   bsTooltip("settings_button2", "Settings", placement = "right"),
+                  actionButton("edit", label = icon("edit"), class ="right-btn"),
+                  bsTooltip("edit", "Edit Non-interpolated data", placement = "right"),
                   hr(),
                   textOutput("single_file_info"),
                 ),
@@ -122,7 +124,14 @@ ui <- fluidPage(
                     br(),
                     plotOutput("plot_freq_analysis"),
                     br(),
-                    column(width = 5, offset = 3, tableOutput("table_freq_analysis")),
+                    column(width = 7,
+                    plotOutput("plot_freq_analysis_2"),
+                    br()),
+                    column(width = 5, 
+                    br(),
+                    tableOutput("table_freq_analysis")),
+                    br(),
+                    plotOutput("plot_freq_analysis_3"),
                     br(),
                   ),
                   
@@ -136,7 +145,13 @@ ui <- fluidPage(
                     br(),
                     plotOutput("plot_wave_analysis"),
                     br(),
-                    column(width = 5, offset = 3, tableOutput("table_wave_analysis")),
+                    column(width = 7,
+                    plotOutput("plot_wave_analysis_2"),
+                    br()),
+                    column(width = 5, 
+                    br(),
+                    tableOutput("table_wave_analysis")),
+                    plotOutput("plot_wave_analysis_3"),
                     br(),
                   )
                 )
@@ -164,7 +179,7 @@ ui <- fluidPage(
                    column(width = 6,
                    numericInput("freqhr_button", "Frecuency size", value = 4, min = 1, step = 1),
                    bsTooltip("freqhr_button", "Frequency interpolation value. Default: 4 Hz", placement = "right"),
-                   selectInput(inputId = "frequency_method_selection", c("linear", "spline"), label = "Select the interpolation method", selected = "spline"),
+                   selectInput(inputId = "frequency_method_selection", c("linear", "spline"), label = "Select the interpolation method", selected = "linear"),
                    selectInput(inputId = "frequency_type_selection", c("fourier", "wavelet"), label = "Select the frequency type analysis", selected = "fourier"),
                    
                         conditionalPanel(
@@ -233,6 +248,7 @@ server <- function(input, output, session) {
         folder_info <- reactiveVal(list())
         restoreIntervalsClick <- reactiveVal(FALSE)
         hour_min <- reactiveVal(NULL)
+        hrv_data <- reactiveVal(NULL)
 
   
   
@@ -382,10 +398,19 @@ server <- function(input, output, session) {
             output$single_file_info <- renderPrint(
               cat(paste0("The file ", single_file$file_name, " has been uploaded from ", single_file$path_file))
             )
+            hrv_data(prep_analysis(fileType = input$type_of_file, Recordname = single_file$file_name, RecordPath = single_file$path_file))
         })
-   
-
         
+        #Edit hrv.data to remove outliers
+        observeEvent(input$edit, {
+          if(!is.null(hrv_data())){
+            hrv_data(EditNIHR(hrv_data()))
+          } else{
+            showNotification("Error: Please choose a valid file", type = "error")
+          }
+        })
+        
+          
         #TIME ANALYSIS__________________________________________________________
         observeEvent(input$Analyze_Time_Button, {
           if(is.null(single_file$file_name)){
@@ -393,20 +418,16 @@ server <- function(input, output, session) {
             observeEvent(input$file_selector, {output$info_file_selection <- renderPrint(cat(" "))})
           } else {
             #Calls time_single_analysis function in "ShinyAppSingleFileAnalysis"
-            hrv.data <- time_single_analysis(fileType = input$type_of_file, 
-                                             Recordname = single_file$file_name, 
-                                             RecordPath = single_file$path_file, 
-                                             size = input$window_size_button, 
-                                             interval = input$interval_size_button, 
-                                             freqhr = input$freqhr_button, 
-                                             method = input$frequency_method_selection)
+            hrv.data <- time_single_analysis(hrv_data(), size = input$window_size_button, interval = input$interval_size_button, freqhr = input$freqhr_button,  method = input$frequency_method_selection)
+
             #Plot the file in the load data file
             output$plot_time_analysis <- renderPlot({PlotHR(hrv.data)})
             #Shows the table with the time analysis
             output$table_time_analysis <-  renderTable({
-               TIME <- c("Size",	"SDNN",	"SDANN",	"SDNNIDX", "pNN50",	"SDSD",	"rMSSD", "IRRR",	"MADRR",	"TINN",	"HRVi")
-               VALUES <- c(hrv.data$TimeAnalysis[[1]]$size,hrv.data$TimeAnalysis[[1]]$SDNN,hrv.data$TimeAnalysis[[1]]$SDANN,hrv.data$TimeAnalysis[[1]]$SDNNIDX,hrv.data$TimeAnalysis[[1]]$pNN50,hrv.data$TimeAnalysis[[1]]$SDSD,
-                           hrv.data$TimeAnalysis[[1]]$rMSSD,hrv.data$TimeAnalysis[[1]]$IRRR,hrv.data$TimeAnalysis[[1]]$MADRR,hrv.data$TimeAnalysis[[1]]$TINN,hrv.data$TimeAnalysis[[1]]$HRVi)
+               len <- length(hrv.data$TimeAnalysis)
+               TIME <- c("File", "Size",	"SDNN",	"SDANN",	"SDNNIDX", "pNN50",	"SDSD",	"rMSSD", "IRRR",	"MADRR",	"TINN",	"HRVi")
+               VALUES <- c(single_file$file_name, hrv.data$TimeAnalysis[[len]]$size,hrv.data$TimeAnalysis[[len]]$SDNN,hrv.data$TimeAnalysis[[len]]$SDANN,hrv.data$TimeAnalysis[[len]]$SDNNIDX,hrv.data$TimeAnalysis[[len]]$pNN50,hrv.data$TimeAnalysis[[len]]$SDSD,
+                           hrv.data$TimeAnalysis[[len]]$rMSSD,hrv.data$TimeAnalysis[[len]]$IRRR,hrv.data$TimeAnalysis[[len]]$MADRR,hrv.data$TimeAnalysis[[len]]$TINN,hrv.data$TimeAnalysis[[len]]$HRVi)
                results <- cbind(TIME, VALUES)
                results
               })
@@ -422,9 +443,7 @@ server <- function(input, output, session) {
             observeEvent(input$file_selector, {output$info_freq_selection <- renderPrint(cat(" "))})
           } else {
             #Calls fourier_single_analysis function in "ShinyAppSingleFileAnalysis"
-            hrv.data = fourier_single_analysis(fileType = input$type_of_file, 
-                                               Recordname = single_file$file_name, 
-                                               RecordPath = single_file$path_file,
+            hrv.data = fourier_single_analysis(hrv.data = hrv_data(),
                                                freqhr = input$freqhr_button, 
                                                method = input$frequency_method_selection, 
                                                size = input$window_size_button, 
@@ -438,16 +457,21 @@ server <- function(input, output, session) {
                                                HFmin = input$HFmin, 
                                                HFmax = input$HFmax, 
                                                type = "fourier")
-            #Plot the file in the load data file
+            #Plot the powerbands
             output$plot_freq_analysis <- renderPlot({PlotPowerBand(hrv.data, ymax=200, ymaxratio = 1.7)})
+            #Plot the spectogram
+            output$plot_freq_analysis_2 <- renderPlot({PlotSpectrogram(hrv.data, size = input$window_size_button, shift = input$window_shift_button,sizesp = 2048, freqRange = c(0,0.2))})
+            #Plot the spectrum
+            output$plot_freq_analysis_3 <- renderPlot({CalculatePSD(hrv.data, doPlot = T)})
             #Print the name of the file and its datapath
             output$info_freq_analysis <-  renderPrint({cat(paste0("The file ",  basename(file), " has been uploaded"))})
             #Shows the table with the time analysis
             output$table_freq_analysis <-  renderTable({ 
-              FOURIER <- c("File", "Method", "ULFmin", "ULFmax", "VLFmin", "VLFmax", "LFmin", "LFmax", "HFmin", "HFmax", "Size", "Shift")
+              hrv.data = CalculatePSD(hrv.data)
+              energy <- CalculateEnergyInPSDBands(hrv.data)
+              FOURIER <- c("File", "Method", "ULF", "VLF", "LF", "HF")
               VALUES <- c(single_file$file_name,input$frequency_method_selection, 
-                          input$ULFmin, input$ULFmax, input$VLFmin, input$VLFmax,input$LFmin,input$LFmax,input$HFmin,input$HFmax,
-                          input$window_size_button, input$window_shift_button)
+                          energy[1], energy[2], energy[3], energy[4])
               results <- cbind(FOURIER, VALUES)
               results
               })
@@ -463,9 +487,7 @@ server <- function(input, output, session) {
             observeEvent(input$file_selector, {output$info_wave_selection <- renderPrint(cat(" "))})
           } else {
             #Calls wavelet_single_analysis function in "ShinyAppSingleFileAnalysis"
-            hrv.data = wavelet_single_analysis(fileType = input$type_of_file, 
-                                               Recordname = single_file$file_name, 
-                                               RecordPath = single_file$path_file,
+            hrv.data = wavelet_single_analysis(hrv.data = hrv_data(),
                                                freqhr = input$freqhr_button, 
                                                method = input$frequency_method_selection, 
                                                size = input$window_size_button,
@@ -483,14 +505,19 @@ server <- function(input, output, session) {
                                                bandtolerance = input$band_tolerance_button)
           #Plot the file in the load data file
           output$plot_wave_analysis <- renderPlot({PlotPowerBand(hrv.data, ymax=700, ymaxratio = 50)})
+          #Plot the spectogram
+          output$plot_wave_analysis_2 <- renderPlot({PlotSpectrogram(hrv.data, size = input$window_size_button, shift = input$window_shift_button, sizesp = 2048, freqRange = c(0,0.2))})
+          #Plot the spectrum
+          output$plot_wave_analysis_3 <- renderPlot({CalculatePSD(hrv.data, doPlot = T)}) 
           #Print the name of the file and its datapath
           output$info_wave_analysis <-  renderPrint({ cat(paste0("The file ",  basename(file), " has been uploaded")) })
           #Shows the table with the time analysis
           output$table_wave_analysis <-  renderTable({
-            WAVELET <- c("File", "Bandtolerance", "Wavelet", "Method", "ULFmin", "ULFmax", "VLFmin", "VLFmax", "LFmin", "LFmax", "HFmin", "HFmax", "Size", "Shift")
-            VALUES <- c(single_file$file_name, input$band_tolerance_button, input$wavelet_method_selection,input$frequency_method_selection, 
-                             input$ULFmin, input$ULFmax, input$VLFmin, input$VLFmax,input$LFmin,input$LFmax,input$HFmin,input$HFmax,
-                             input$window_size_button, input$window_shift_button)
+            hrv.data = CalculatePSD(hrv.data)
+            energy <- CalculateEnergyInPSDBands(hrv.data)
+            WAVELET <- c("File", "Method", "ULF", "VLF", "LF", "HF")
+            VALUES <- c(single_file$file_name,input$frequency_method_selection, 
+                        energy[1], energy[2], energy[3], energy[4])
             results <- cbind(WAVELET, VALUES)
             results
           })
@@ -546,6 +573,8 @@ server <- function(input, output, session) {
 shinyApp(ui = ui, server = server)
   
 }
+# 
+
 
 
 
