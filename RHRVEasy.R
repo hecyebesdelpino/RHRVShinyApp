@@ -480,7 +480,8 @@ posthoc.kruskal.dunn.test.CheckAllValuesEqual<-function(formula, data, p.adjt){
   # we will return NULL since there are no differences between the populations.
   dunn =tryCatch(
     {
-      posthoc.kruskal.dunn.test(formula, data, p.adjust.method =  p.adjt, na.action=na.omit)
+      #posthoc.kruskal.dunn.test(formula, data, p.adjust.method =  p.adjt, na.action=na.omit)
+      kwAllPairsDunnTest(formula, data, p.adjust.method =  p.adjt, na.action=na.omit)
     },
     error=function(cond) {
       if(verb){

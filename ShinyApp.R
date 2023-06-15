@@ -5,7 +5,7 @@ library(shinyjs)
 library(shinyBS)
 library(shinyWidgets)
   
-setwd("C://Users/hyebe/Desktop/RHRVEasy-master/")
+setwd("D:\\RHRVShinyApp")
 source("RHRVEasy.R")
 source("ShinyAppCustomizedStyles.R")
 source("ShinyAppRestrictions.R")
