@@ -5,7 +5,7 @@ library(shinyjs)
 library(shinyBS)
 library(shinyWidgets)
   
-setwd("D:\\RHRVShinyApp")
+setwd("C://Users/hyebe/Desktop/RHRVEasy-master/")
 source("RHRVEasy.R")
 source("ShinyAppCustomizedStyles.R")
 source("ShinyAppRestrictions.R")
@@ -26,7 +26,7 @@ ui <- fluidPage(
         h1("Welcome to the HRV App"), 
         p("This app will allow you to obtain some graphical and statistical studies of your HRV samples"),
         p("Just go through the different tabs and try them all"),
-        p("This app reads Ascii, RR, Ambit, Suunto and EDFPlus files"),
+        p("This app preads Ascii, RR, Ambit, Suunto and EDFPlus files"),
         p("If you have any problem, please contact us"),
       ),
       
@@ -39,12 +39,14 @@ ui <- fluidPage(
                    numericInput(inputId = "num_samples", label = "Number of samples", value = 2, min = 1, step = 1),
                    bsTooltip("num_samples", "Introduce the number of folders", placement = "right"),
                    selectInput("format_check", label = "Select the type of file", choices = c("RR","Ascii", "Polar", "Suunto", "EDFPlus", "Ambit"), selected = NULL),
-                   actionButton("upload_files_button", "Upload files", class = "light-blue-button"),
+                   actionButton("upload_files_button", "Select folders", class = "light-blue-button"),
                    uiOutput(outputId = "samples"),
                    textOutput("info"),
                    br(),
                    actionButton("settings_button", label = icon("cog")),
                    br(),
+                   br(),
+                   actionButton("resetButton", "New analysis", class = "light-blue-button")
                  ),
                  
 
@@ -53,19 +55,18 @@ ui <- fluidPage(
                        numericInput("significance_level", "Significance level", value = 0.05, step = 0.001),
                        h3("Correction method"),
                        selectInput(inputId = "correction_method_selection", choices = c("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none"), selected = "bonferroni",  label =  "Please select the correction method"),
+                       selectInput(inputId = "frequency_type_selection", c("fourier", "wavelet"), label = "Select the frequency type analysis", selected = "fourier"),
                        textOutput("save_message"),
                        actionButton("save_yes", label = "Yes"),
                        actionButton("save_no", label = "No"),
                        textOutput("save"),
                        br(),
-                       textOutput("info_other_panel"),
                        textOutput("loading"),
                        
                        conditionalPanel(
                          condition = ("input.save_yes > 0 || input.save_no > 0"),
                          actionButton("save_2", label =  icon("save")),
                          actionButton("RHRV", "RHRV study", class = "blue-button"),
-                         textOutput("console_info"), #UNUSED
                          br(),
                        ),
                     
@@ -73,6 +74,7 @@ ui <- fluidPage(
                          condition = "input.RHRV > 0",
                          textOutput("RHRV_results"),
                          tableOutput("table_RHRV_analysis"),
+                         tableOutput("table_RHRV_analysis2"),
                       ),
                       
                       textOutput("info_multiple_analysis")
@@ -163,13 +165,12 @@ ui <- fluidPage(
       #_4_Settings_________________________________________________________________
       tabPanel("Settings",
                column(width = 4,
-               h3("Window configuration"),
+               h3("Time configuration"),
                    column(width = 12,
                    numericInput("window_size_button", "Window size", value = 300, min = 1, max = 1000, step = 1),
                    bsTooltip("window_size_button", "The size of the window employed in time analysis. Default: 300 miliseconds", placement = "right"),
                    numericInput("interval_size_button", "Interval", value = 7.8125, step = 0.01),
                    bsTooltip("interval_size_button", "Bin width of the histogram. Default 7.8125", placement = "right"),
-                   numericInput("window_shift_button", "Shift", value = 150, min = 1, max = 500, step = 1),
                    br(),
                    )
                ),
@@ -177,24 +178,24 @@ ui <- fluidPage(
                column(width = 8,
                h3("Frequency configuration"),
                    column(width = 6,
+                   
                    numericInput("freqhr_button", "Frecuency size", value = 4, min = 1, step = 1),
                    bsTooltip("freqhr_button", "Frequency interpolation value. Default: 4 Hz", placement = "right"),
                    selectInput(inputId = "frequency_method_selection", c("linear", "spline"), label = "Select the interpolation method", selected = "linear"),
-                   selectInput(inputId = "frequency_type_selection", c("fourier", "wavelet"), label = "Select the frequency type analysis", selected = "fourier"),
+                   br(),
+                   h3("Fourier"),
+                   numericInput("window_size_button2", "Window size", value = 300, min = 1, max = 1000, step = 1),
+                   bsTooltip("window_size_button2", "The size of the window employed in time analysis. Default: 300 miliseconds", placement = "right"),
+                   numericInput("window_shift_button", "Shift", value = 150, min = 1, max = 500, step = 1),
+                   selectInput(inputId = "fourier_method_selection", choices = c("ar", "lomb", "pgram"), label = "Select the fourier method", selected = "lomb"),
                    
-                        conditionalPanel(
-                             condition = "input.frequency_type_selection == 'fourier'",
-                             br(),
-                             selectInput(inputId = "fourier_method_selection", choices = c("ar", "lomb", "pgram"), label = "Select the fourier method", selected = "lomb"),
-                         ),   
-                        conditionalPanel(
-                            condition = "input.frequency_type_selection == 'wavelet'",
-                            br(),
-                            selectInput(inputId = "wavelet_method_selection", choices = c("la8","la16","la20","d4","d6","d8","d16","bl14","bl20","fk4","fk6","fk8","fk14","fk22","mb4","mb8","mb16","mb24", "bs3.1"), label = "Select the wavelet type", selected = "d4"),
-                            numericInput("band_tolerance_button", "Band tolerance", value = 0.100, min = 0.001, step = 0.001),
-                            bsTooltip("band_tolerance_button", "Maximum acceptable error in the estimation of spectral bands", placement = "right"),
-                            br()
-                          ),
+                   br(),
+                   h3("Wavelet"),
+                   selectInput(inputId = "wavelet_method_selection", choices = c("la8","la16","la20","d4","d6","d8","d16","bl14","bl20","fk4","fk6","fk8","fk14","fk22","mb4","mb8","mb16","mb24", "bs3.1"), label = "Select the wavelet type", selected = "d4"),
+                   numericInput("band_tolerance_button", "Band tolerance", value = 0.100, min = 0.001, step = 0.001),
+                   bsTooltip("band_tolerance_button", "Maximum acceptable error in the estimation of spectral bands", placement = "right"),
+                   br()
+
                    ),
                
                    column(width = 6,
@@ -249,7 +250,7 @@ server <- function(input, output, session) {
         restoreIntervalsClick <- reactiveVal(FALSE)
         hour_min <- reactiveVal(NULL)
         hrv_data <- reactiveVal(NULL)
-
+        hide(id="resetButton")
   
   
   #_1_FILE UPLOAD_______________________________________________________________
@@ -287,12 +288,14 @@ server <- function(input, output, session) {
           hide(id= "save_2")
           save_path(normalizePath(choose.dir(caption = "Select the location where the results are going to be saved")))
           output$save <- renderPrint({cat(paste0("Results will be available in: ", save_path()))})
+          show(id = "RHRV")
         })
         
         #NO_____________________________________________________________________
         observeEvent(input$save_no, {
           hide(id= "save_2")
           output$save <- renderPrint(cat("No copy will be done"))
+          show(id = "RHRV")
         })
         
         #Save after computing the analysis (usefull for extra copies or in case user said no at first time)
@@ -314,7 +317,7 @@ server <- function(input, output, session) {
           updateTabsetPanel(session, "tabset", selected = "Settings")
         })         
   
-        
+
               
         
   #_4_RHRVEASY_ANALYSIS_________________________________________________________
@@ -328,15 +331,22 @@ server <- function(input, output, session) {
         })
 
         #The analysis___________________________________________________________
-        observeEvent(input$RHRV, {  
+        observeEvent(input$RHRV, {
           len <- length(file_paths())
+          paths <- file_paths()
+          print(paths)
+          #checking <- check_format_in_folders(session, paths, format = input$format_check)
           if(len == 0 ){
             showNotification("Please upload files", duration = 3, type = "error")
-            
           } else if(len == 1){
             showNotification("Please select more than 1 file for multiple analysis. For performing single file analysis go to the next tab", duration = 4, type = "warning")
-            
-          } else {
+          # } else if(!checking){
+          #   showNotification("Please select the correct file type", duration = 4, type = "warning")
+          #   #print("Estoy en el else if")
+          # } else if(checking){
+          #   
+           } else {
+             tryCatch({
             show(id = "loading")
             hide(id = "save_yes")
             hide(id= "save_no")
@@ -347,27 +357,27 @@ server <- function(input, output, session) {
             hide(id = "upload_files_button")
             path_save <- save_path()
             resultados_dataframe <- RHRVEasy(folders = file_paths(),
-                                             correctionMethod = input$correction_method_selection,
-                                             format = input$format_check,
-                                             typeAnalysis = input$frequency_type_selection,
-                                             saveHRVindexesInPath = path_save,
-                                             significance_level = input$significance_level,
-                                             size = input$window_size_button,
-                                             interval = input$interval_size_button,
-                                             freqhr = input$freqhr_button,
-                                             type = input$frequency_method_selection,
-                                             #method = input$frequency_method_selection,
-                                             #method2 = input$fourier_method_selection,
-                                             ULFmin = input$ULFmin,
-                                             ULFmax = input$ULFmax,
-                                             VLFmin = input$VLFmin,
-                                             VLFmax = input$VLFmax,
-                                             LFmin = input$LFmin,
-                                             LFmax = input$LFmax,
-                                             HFmin = input$HFmin,
-                                             HFmax = input$HFmax,
-                                             wavelet = input$wavelet_method_selection,
-                                             bandtolerance = input$band_tolerance_button)
+                                              correctionMethod = input$correction_method_selection,
+                                              format = input$format_check,
+                                              typeAnalysis = input$frequency_type_selection,
+                                              saveHRVindexesInPath = path_save,
+                                              significance_level = input$significance_level,
+                                              size = input$window_size_button,
+                                              interval = input$interval_size_button,
+                                              freqhr = input$freqhr_button,
+                                              type = input$frequency_method_selection,
+                                              #method = input$frequency_method_selection,
+                                              #method2 = input$fourier_method_selection,
+                                              ULFmin = input$ULFmin,
+                                              ULFmax = input$ULFmax,
+                                              VLFmin = input$VLFmin,
+                                              VLFmax = input$VLFmax,
+                                              LFmin = input$LFmin,
+                                              LFmax = input$LFmax,
+                                              HFmin = input$HFmin,
+                                              HFmax = input$HFmax,
+                                              wavelet = input$wavelet_method_selection,
+                                              bandtolerance = input$band_tolerance_button)
             #Saves results in global environment so they could be later used
             assign("Resultados_dataframe", resultados_dataframe, envir = .GlobalEnv)
             resultados_texto <- capture.output(resultados_dataframe)
@@ -375,15 +385,43 @@ server <- function(input, output, session) {
             assign("Resultados_texto", resultados_texto, envir = .GlobalEnv)
             #Calls a function in (SingleFileAnalysis.R) which treats the dataframe to show to the user in a more visual way
             results_matrix = multiple_results(resultados_dataframe)
+            table1 <- results_matrix[[1]]
+            table2 <- results_matrix[[2]]
             #Once analysis its finished, user can do another one
             show(id = "save_2")
-            show(id = "RHRV")
-            show(id = "save")
-            show(id = "upload_files_button")
+            show(id = "resetButton")
             hide(id = "loading")
             #Displays the multiple file table results
-            output$table_RHRV_analysis <- renderTable(results_matrix[-1,])
-          }
+            output$table_RHRV_analysis <- renderTable(table1[-1,])
+            output$table_RHRV_analysis2 <- renderTable(table2)
+             }, error = function(e) {
+              showNotification(paste0("Check the file is in the correct format"), duration = 3, closeButton = FALSE, type = "warning")
+              show(id = "save_message")
+              show(id = "save_yes")
+              show(id= "save_no")
+              show(id = "save")
+              output$save <- renderPrint({cat(" ")})
+              show(id = "upload_files_button")
+              hide(id = "save_2")
+              hide(id = "RHRV")
+              hide(id = "loading")
+
+             })
+             }
+        })
+        
+        #Reset tab for second analysis
+        observeEvent(input$resetButton, {
+          output$table_RHRV_analysis <- renderTable(data.frame(NULL))
+          show(id = "save_message")
+          show(id = "save_yes")
+          show(id= "save_no")
+          show(id = "save")
+          output$save <- renderPrint({cat(" ")})
+          show(id = "upload_files_button")
+          hide(id = "save_2")
+          hide(id = "RHRV")
+          hide(id = "resetButton")
         })
         
 
@@ -398,7 +436,7 @@ server <- function(input, output, session) {
             output$single_file_info <- renderPrint(
               cat(paste0("The file ", single_file$file_name, " has been uploaded from ", single_file$path_file))
             )
-            hrv_data(prep_analysis(fileType = input$type_of_file, Recordname = single_file$file_name, RecordPath = single_file$path_file))
+              hrv_data(prep_analysis(fileType = input$type_of_file, Recordname = single_file$file_name, RecordPath = single_file$path_file))
         })
         
         #Edit hrv.data to remove outliers
@@ -428,7 +466,11 @@ server <- function(input, output, session) {
                TIME <- c("File", "Size",	"SDNN",	"SDANN",	"SDNNIDX", "pNN50",	"SDSD",	"rMSSD", "IRRR",	"MADRR",	"TINN",	"HRVi")
                VALUES <- c(single_file$file_name, hrv.data$TimeAnalysis[[len]]$size,hrv.data$TimeAnalysis[[len]]$SDNN,hrv.data$TimeAnalysis[[len]]$SDANN,hrv.data$TimeAnalysis[[len]]$SDNNIDX,hrv.data$TimeAnalysis[[len]]$pNN50,hrv.data$TimeAnalysis[[len]]$SDSD,
                            hrv.data$TimeAnalysis[[len]]$rMSSD,hrv.data$TimeAnalysis[[len]]$IRRR,hrv.data$TimeAnalysis[[len]]$MADRR,hrv.data$TimeAnalysis[[len]]$TINN,hrv.data$TimeAnalysis[[len]]$HRVi)
-               results <- cbind(TIME, VALUES)
+               #VALUES <- sapply(VALUES, function(x) ifelse(is.numeric(x), round(x, digits = 2), x))
+               print(VALUES)
+               VALUES <- sapply(VALUES, function(x) ifelse(is.numeric(x), round(x, 2), x))
+               print(VALUES)
+               results <- cbind(TIME, VALUES )
                results
               })
           }  
@@ -446,7 +488,7 @@ server <- function(input, output, session) {
             hrv.data = fourier_single_analysis(hrv.data = hrv_data(),
                                                freqhr = input$freqhr_button, 
                                                method = input$frequency_method_selection, 
-                                               size = input$window_size_button, 
+                                               size = input$window_size_button2, 
                                                shift = input$window_shift_button, 
                                                ULFmin = input$ULFmin, 
                                                ULFmax = input$ULFmax, 
@@ -458,9 +500,10 @@ server <- function(input, output, session) {
                                                HFmax = input$HFmax, 
                                                type = "fourier")
             #Plot the powerbands
-            output$plot_freq_analysis <- renderPlot({PlotPowerBand(hrv.data, ymax=200, ymaxratio = 1.7)})
+            #output$plot_freq_analysis <- renderPlot({PlotPowerBand(hrv.data, ymax=200, ymaxratio = 1.7)})
+            output$plot_freq_analysis <- renderPlot({PlotPowerBand(hrv.data,ymax=200, ymaxratio = 1.7)})
             #Plot the spectogram
-            output$plot_freq_analysis_2 <- renderPlot({PlotSpectrogram(hrv.data, size = input$window_size_button, shift = input$window_shift_button,sizesp = 2048, freqRange = c(0,0.2))})
+            output$plot_freq_analysis_2 <- renderPlot({PlotSpectrogram(hrv.data, size = input$window_size_button2, shift = input$window_shift_button,sizesp = 2048, freqRange = c(0,0.2), ylim = 200)})
             #Plot the spectrum
             output$plot_freq_analysis_3 <- renderPlot({CalculatePSD(hrv.data, doPlot = T)})
             #Print the name of the file and its datapath
@@ -490,7 +533,7 @@ server <- function(input, output, session) {
             hrv.data = wavelet_single_analysis(hrv.data = hrv_data(),
                                                freqhr = input$freqhr_button, 
                                                method = input$frequency_method_selection, 
-                                               size = input$window_size_button,
+                                               size = input$window_size_button2,
                                                shift = input$window_shift_button, 
                                                ULFmin = input$ULFmin, 
                                                ULFmax = input$ULFmax, 
@@ -506,7 +549,7 @@ server <- function(input, output, session) {
           #Plot the file in the load data file
           output$plot_wave_analysis <- renderPlot({PlotPowerBand(hrv.data, ymax=700, ymaxratio = 50)})
           #Plot the spectogram
-          output$plot_wave_analysis_2 <- renderPlot({PlotSpectrogram(hrv.data, size = input$window_size_button, shift = input$window_shift_button, sizesp = 2048, freqRange = c(0,0.2))})
+          output$plot_wave_analysis_2 <- renderPlot({PlotSpectrogram(hrv.data, size = input$window_size_button2, shift = input$window_shift_button, sizesp = 2048, freqRange = c(0,0.2))})
           #Plot the spectrum
           output$plot_wave_analysis_3 <- renderPlot({CalculatePSD(hrv.data, doPlot = T)}) 
           #Print the name of the file and its datapath
@@ -538,6 +581,7 @@ server <- function(input, output, session) {
         observeEvent(input$HFmin, {settings_restrictions(session, input)})
         observeEvent(input$HFmax, {settings_restrictions(session, input)})
         observeEvent(input$window_size_button, {settings_restrictions(session, input)})
+        observeEvent(input$window_size_button2, {settings_restrictions(session, input)})
         observeEvent(input$window_shift_button, {settings_restrictions(session, input)})
         observeEvent(input$interval_size_button, {settings_restrictions(session, input)})
         observeEvent(input$band_tolerance_button, {settings_restrictions(session, input)})
@@ -559,6 +603,7 @@ server <- function(input, output, session) {
             updateNumericInput(session, inputId = "HFmin", value = 0.150)
             updateNumericInput(session, inputId = "HFmax", value = 0.400)
             updateNumericInput(session, inputId = "window_size_button", value = 300)
+            updateNumericInput(session, inputId = "window_size_button2", value = 300)
             updateNumericInput(session, inputId = "window_shift_button", value = 150)
             updateNumericInput(session, inputId = "interval_size_button", value = 7.8125)
             updateNumericInput(session, inputId = "band_tolerance_button", value = 0.1)
